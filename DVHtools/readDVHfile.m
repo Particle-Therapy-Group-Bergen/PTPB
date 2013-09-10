@@ -207,13 +207,31 @@ end
 
 header = struct('patientName', patientName, 'patientId', patientId,
                 'comment', comment, 'progDate', progDate, 'exportuser', exportuser,
-		'progType', progType, 'planStatus', planStatus,
+                'progType', progType, 'planStatus', planStatus,
                 'description', description, 'plan', plan,
                 'prescribedDose', prescribedDose,
                 'prescribedDoseUnit', prescribedDoseUnit,
                 'percentForDose', percentForDose,
                 'percentForDoseUnit', percentForDoseUnit);
 linesDone = n-1;
+return;
+
+
+function [data, dataUnit] = findColumn(name, tabledata, colheading, colunits)
+%Tries to find a column with a given name from the list of column headings
+%given by colheading. If the column is found then the data is copied from
+%tabledata to the output 'data' variable and the physical units string for
+%the column is copied out from colunits to dataUnit.
+
+data = [];
+dataUnit = '';
+for k = 1:length(colheading)
+    if strcmp(colheading{k}, name) == 1
+        data = tabledata(:,k)';
+        dataUnit = colunits{k};
+        break;
+    end
+end
 return;
 
 
@@ -378,10 +396,16 @@ dose = [];
 doseUnit = '';
 relativeDose = [];
 relativeDoseUnit = '';
+structureVolume = [];
+structureVolumeUnit = '';
 ratioToTotalVolume = [];
 ratioToTotalVolumeUnit = '';
-row = 1;
+ncol = 0;
+colexpr = '';
+colheading = {};
+colunits = {};
 
+% Find the data table heading and figure out the number of columns it contains.
 while n <= length(lines)
     line = lines{n};
     n++;
@@ -389,20 +413,38 @@ while n <= length(lines)
         % Skip blank lines
         continue;
     end
-    tokens = regexp(line, '^\s*Dose\s*\[(.*)\]\s*Relative dose\s*\[(.*)\]\s*Ratio of Total Structure Volume\s*\[(.*)\]\s*$', 'tokens');
-    if length(tokens) > 0
-        doseUnit = tokens{1}{1};
-        relativeDoseUnit = tokens{1}{2};
-        ratioToTotalVolumeUnit = tokens{1}{3};
-        continue;
+    expr = '^\s*([^\[\]]*)\s+\[([^\[\]]*)\](.*)$';
+    tokens = regexp(line, expr, 'tokens');
+    ncol = 0;
+    while length(tokens) > 0
+        remainder = tokens{1}{3};
+        ncol++;
+        tokens = regexp(remainder, expr, 'tokens');
     end
-    tokens = regexp(line, '^\s*([+\-\.eE0-9]+)\s+([+\-\.eE0-9]+)\s+([+\-\.eE0-9]+)\s*$', 'tokens');
-    if length(tokens) > 0
-        dose(row) = convertToNumber(tokens{1}{1});
-        relativeDose(row) = convertToNumber(tokens{1}{2});
-        ratioToTotalVolume(row) = convertToNumber(tokens{1}{3});
-        row++;
-        continue;
+    if ncol > 0
+        % Build up the parsing regular expressions for the heading line (expr)
+        % and the data itself (colexpr, to be used later).
+        expr = '^';
+        colexpr = '^';
+        for k = 1:ncol
+            expr = strcat(expr, '\s*([^\[\]]*)\s+\[([^\[\]]*)\]');
+            if k == 1
+                colexpr = strcat(colexpr, '\s*([+\-\.eE0-9]+)');
+            else
+                colexpr = strcat(colexpr, '\s+([+\-\.eE0-9]+)');
+            end
+        end
+        expr = strcat(expr, '\s*$');
+        colexpr = strcat(colexpr, '\s*$');
+        % Parse the table heading.
+        tokens = regexp(line, expr, 'tokens');
+        if length(tokens) > 0
+            for k = 1:ncol
+                colheading{k} = tokens{1}{k*2-1};
+                colunits{k} = tokens{1}{k*2};
+            end
+        end
+        break;
     end
     % If we did not match and continue from any of the regexp checks above
     % and ended up at this point then we assume the section we are looking
@@ -410,6 +452,39 @@ while n <= length(lines)
     n--;  % Decrement n since this last line was not processed.
     break;
 end
+
+% Parse the data lines from the table.
+tabledata = [];
+row = 1;
+if ncol > 0
+    while n <= length(lines)
+        line = lines{n};
+        n++;
+        if length(line) == 0
+            % Skip blank lines
+            continue;
+        end
+        tokens = regexp(line, colexpr, 'tokens');
+        if length(tokens) > 0
+            for k = 1:ncol
+                tabledata(row, k) = convertToNumber(tokens{1}{k});
+            end
+            row++;
+            continue;
+        end
+        % If we did not match and continue from any of the regexp checks above
+        % and ended up at this point then we assume the section we are looking
+        % at is no longer part of the data table and we stop parsing.
+        n--;  % Decrement n since this last line was not processed.
+        break;
+    end
+end
+
+% Now find the relevant columns and assign them.
+[dose, doseUnit] = findColumn('Dose', tabledata, colheading, colunits);
+[relativeDose, relativeDoseUnit] = findColumn('Relative dose', tabledata, colheading, colunits);
+[structureVolume, structureVolumeUnit] = findColumn('Structure Volume', tabledata, colheading, colunits);
+[ratioToTotalVolume, ratioToTotalVolumeUnit] = findColumn('Ratio of Total Structure Volume', tabledata, colheading, colunits);
 
 % Check that we parsed all relevant information for the structure.
 % If not then warn the user.
@@ -423,8 +498,8 @@ if length(structName) == 0 || length(approvalStatus) == 0 || length(plan) == 0 \
         || modalDose == nan || length(modalDoseUnit) == 0 \
         || medianDose == nan || length(medianDoseUnit) == 0 \
         || standardDeviation == nan || length(standardDeviationUnit) == 0 \
-        || length(doseUnit) == 0 || length(relativeDoseUnit) == 0 \
-        || length(ratioToTotalVolumeUnit) == 0 \
+        || (length(doseUnit) == 0 && length(relativeDoseUnit) == 0) \
+        || (length(structureVolumeUnit) == 0 && length(ratioToTotalVolumeUnit) == 0)
     warning('Could not find all the relevant fields for a DVH structure. Current line %d.', n);
 end
 
@@ -444,6 +519,7 @@ data = struct('structName', structName, 'approvalStatus', approvalStatus,
               'gradientMeasure', gradientMeasure, 'gradientMeasureUnit', gradientMeasureUnit,
               'dose', dose, 'doseUnit', doseUnit,
               'relativeDose', relativeDose, 'relativeDoseUnit', relativeDoseUnit,
+              'structureVolume', structureVolume, 'structureVolumeUnit', structureVolumeUnit,
               'ratioToTotalVolume', ratioToTotalVolume, 'ratioToTotalVolumeUnit', ratioToTotalVolumeUnit);
 linesDone = n-1;
 return;

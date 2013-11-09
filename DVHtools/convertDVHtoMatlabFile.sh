@@ -86,7 +86,9 @@ for ARG ; do
 done
 
 if test "$FILE_COUNT" -eq 0 ; then
-    exit
+    echo "ERROR: No input files given." 1>&2
+    PrintHelp
+    exit 1
 fi
 
 if test "$FILE_COUNT" -gt 1 -a -n "$OUTPUT_FILENAME" ; then

@@ -1,14 +1,23 @@
 function dose = OED(responseModel, doseCumulative, varargin)
-% calculates specified Organ Equivalent Dose (OED) from cumulative dose distribution datapointse
-% responseModel can be either 'LNT', 'PlateauHall' or 'LinExp'
+%dose = OED(responseModel, doseCumulative, ...)
+%
+% Calculates the Organ Equivalent Dose (OED) from the cumulative dose distribution data points.
+%
+%Where,
+% responseModel can be either 'LNT', 'PlateauHall' or 'LinExp'.
+%
+% doseCumulative are the cumulative dose distribution data points as a function of dose (dose on x-axis).
 %
 % Extra parameters passed to OED will be passed onto the integrand functions.
 % For example, to pass the organ specific sterilisation parameter alpha to the LinExp function,
 % call OED as follows: y = OED('LinExp', dataPoints, alpha);
+%
+% The result is the integrated ODE dose.
 
 %FIXME using Gaussian Quadrature method seems to be numerically unstable. Using trapezoidal method instead.
 % dose=quad(@(x) LNT(x,doseCumulative),0,1);
-x = 0:0.001:1;
+h = 1e-5;  % <= step size
+x = 0:h:1;
 if strcmp(responseModel, 'LNT')
 	y = LNT(x, doseCumulative);
 elseif strcmp(responseModel, 'PlateauHall')

@@ -1,32 +1,50 @@
-function y = doseInterpolate(x,datapoints) 
-% function interpolates input discrete datapoints into a continous distribution
-% x is volume fraction, x can be any of scalar, vector or matrix
-% datapoints are the discrete datapoints from the cummulative dose distribution
-% datapoints should be a 2xn matrix
-% y is the dose for a given x and it has the same dimesions as x (if x is vector, y becomes a vector...)
+function y = doseInterpolate(x,datapoints)
+%y = doseInterpolate(x,datapoints)
+%
+% This function interpolates input discrete data points into a continuous distribution.
+%
+%Where,
+% x is volume fraction in the range [0..1]. x can be any of scalar, vector or matrix.
+%
+% datapoints are the discrete data points from the cumulative dose distribution.
+% i.e. the volume fraction (in the range [0..1] on y-axis) as a function of dose (in Gray on x-axis).
+% datapoints should be a 2 by N or N by 2 matrix.
+%
+% The output y is the dose for a given input x and has the same dimensions as x (if x is vector, y becomes a vector...).
 
-% checking dimension of datapoints and returns error if not 2xn or nx2  
+% checking dimension of datapoints and returns error if not 2xN or Nx2
 dim=size(datapoints);
 if length(dim) != 2 || !(dim(1)==2 || dim(2)==2)
-	error('Datapoint must be a 2xn or nx2 matrix');
+	error('Parameter datapoints must be a 2 by N or N by 2 matrix.');
 end
 
+% Note: we actually need to deal with the function: y = f(x)
+% where y is the dose and x is the volume fraction. However, the input datapoints are
+% for the inverse: x = g(y). Thus, need to swap around the axes.
 if dim(1)==2
-	% handling 2xn case
-	xp=datapoints(1,:);
-	yp=datapoints(2,:);
+	% handling 2xN case
+	yp=datapoints(1,:);
+	xp=datapoints(2,:);
 else
-	% handling nx2 case
-	xp=datapoints(:,1);
-	yp=datapoints(:,2);
+	% handling Nx2 case
+	yp=datapoints(:,1);
+	xp=datapoints(:,2);
 end
 
-% Calculate numerical derivative df/dx with: df/dx = (f(x+h) - f(x-h)) / (2*h)
-% h can be adjusted as needed, controls accuracy and stability.
-h = 1e-10;
-method='spline';
-extrap='extrap';
-fxph = interp1(xp, yp, x+h, method, extrap);  % fxph = f(x+h)
-fxmh = interp1(xp, yp, x-h, method, extrap);  % fxmh = f(x-h)
-y = (fxph - fxmh) ./ (2.*h);
+% We need to remove any data points from the ends of the distribution that lie on the
+% same x-axis coordinate, otherwise the interp1 function will fail.
+starti = 1;
+while starti < length(xp)-1 && xp(starti+1) == xp(starti)
+    starti++;
+end
+endi = length(xp);
+while endi > 2 && xp(endi-1) == xp(endi)
+    endi--;
+end
 
+xp = xp(starti:endi);
+yp = yp(starti:endi);
+
+method='pchip';  % Note: spline and cubic seem to give numerical instabilities on the edges of the x range.
+extrap='extrap';
+y = interp1(xp, yp, x, method, extrap);

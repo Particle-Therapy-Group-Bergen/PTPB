@@ -25,7 +25,8 @@ end
 % h can be adjusted as needed, controls accuracy and stability.
 h = 1e-10;
 method='spline';
-fxph = interp1(xp, yp, x+h, method);  % fxph = f(x+h)
-fxmh = interp1(xp, yp, x-h, method);  % fxmh = f(x-h)
+extrap='extrap';
+fxph = interp1(xp, yp, x+h, method, extrap);  % fxph = f(x+h)
+fxmh = interp1(xp, yp, x-h, method, extrap);  % fxmh = f(x-h)
 y = (fxph - fxmh) ./ (2.*h);
 

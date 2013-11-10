@@ -135,9 +135,9 @@ for ARG ; do
                 fi
             fi
             if test "$VERBOSE_COUNT" -gt 1 ; then
-                octave $VERBOSE_OCTAVE --path "$MFILE_PATH" --eval "data = readDVHfile('$INFILE'); save '$OUTFILE' data;"
+                octave $VERBOSE_OCTAVE --path "$MFILE_PATH" --eval "DVH_data = readDVHfile('$INFILE'); save '$OUTFILE' DVH_data;"
             else
-                octave $VERBOSE_OCTAVE --path "$MFILE_PATH" --eval "data = readDVHfile('$INFILE'); save '$OUTFILE' data;" > /dev/null
+                octave $VERBOSE_OCTAVE --path "$MFILE_PATH" --eval "DVH_data = readDVHfile('$INFILE'); save '$OUTFILE' DVH_data;" > /dev/null
             fi
             ;;
     esac

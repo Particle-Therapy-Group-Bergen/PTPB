@@ -66,6 +66,39 @@ end
 xp = xp(starti:endi);
 yp = yp(starti:endi);
 
+% Handle special case where the graph is f(y) == 0. All points are eliminated
+% in the previous step.
+if length(xp) < 2
+    y = zeros(size(x));
+    return;
+end
+
+% Now handle the points in the middle of the range that have two different y
+% values but the same x value. Will need to separate the points along the
+% x-axis by a small amount.
+% Note: we only check the interior points in the range 2..n-1 since the previous
+% steps guarantee that the first and second data points are different and the
+% last two are also different.
+% The first step is to get rid of the middle points for 3 or more consecutive
+% duplicate points.
+index = [1];
+for n = 2:length(xp)-1
+    if xp(n-1) ~= xp(n) || xp(n) ~= xp(n+1)
+        index = [index, n];
+    end
+end
+index = [index, length(xp)];
+xp = xp(index);
+yp = yp(index);
+% The second step is to shift the remaining consecutive points by a small x.
+K = 1e-7;
+for n = 2:length(xp)-2
+    if xp(n) == xp(n+1)
+        xp(n)   = xp(n-1)*K + (1-K)*xp(n);
+        xp(n+1) = xp(n+2)*K + (1-K)*xp(n+1);
+    end
+end
+
 if ~ exist('method')
     % Select the interpolation method if not already given.
     % Note: spline and cubic seem to give numerical instabilities on the edges

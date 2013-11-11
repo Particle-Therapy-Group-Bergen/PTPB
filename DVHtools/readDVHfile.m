@@ -110,6 +110,7 @@ exportuser = '';
 progType = '';
 description = '';
 plan = '';
+plansum = '';
 prescribedDose = nan;
 prescribedDoseUnit = '';
 percentForDose = nan;
@@ -172,6 +173,11 @@ while n <= length(lines)
         plan = tokens{1}{1};
         continue;
     end
+    tokens = regexp(line, '^\s*Plan sum\s*:\s*(.*)\s*$', 'tokens');
+    if length(tokens) > 0
+        plansum = tokens{1}{1};
+        continue;
+    end
     tokens = regexp(line, '^\s*Prescribed dose\s*\[(.*)\]\s*:\s*(.*)\s*$', 'tokens');
     if length(tokens) > 0
         prescribedDoseUnit = tokens{1}{1};
@@ -199,7 +205,7 @@ end
 % Check that we parsed all relevant information for the header.
 % If not then warn the user.
 if length(patientName) == 0 || length(patientId) == 0 || length(progDate) == 0 \
-        || length(progType) == 0 || length(plan) == 0 \
+        || length(progType) == 0 || (length(plan) == 0 && length(plansum) == 0) \
         || prescribedDose == nan || length(prescribedDoseUnit) == 0 \
         || percentForDose == nan || length(percentForDoseUnit) == 0
     warning('Could not find all the relevant DVH header fields. Current line %d.', n);
@@ -208,7 +214,7 @@ end
 header = struct('patientName', patientName, 'patientId', patientId,
                 'comment', comment, 'progDate', progDate, 'exportuser', exportuser,
                 'progType', progType, 'planStatus', planStatus,
-                'description', description, 'plan', plan,
+                'description', description, 'plan', plan, 'plansum', plansum,
                 'prescribedDose', prescribedDose,
                 'prescribedDoseUnit', prescribedDoseUnit,
                 'percentForDose', percentForDose,

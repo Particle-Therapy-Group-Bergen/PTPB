@@ -73,6 +73,12 @@ if length(xp) < 2
     return;
 end
 
+% Handle another special case where does is likely zero.
+if length(xp) == 2 && xp(1) == 1 && xp(2) == 0 && yp(1) == 0 && yp(2) >= 0
+    y = zeros(size(x));
+    return;
+end
+
 % Now handle the points in the middle of the range that have two different y
 % values but the same x value. Will need to separate the points along the
 % x-axis by a small amount.

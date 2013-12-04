@@ -21,7 +21,7 @@ function dose = OED(responseModel, doseCumulative, varargin)
 % For example, to pass the organ specific sterilisation parameter alpha to the LinExp function,
 % call OED as follows: y = OED('LinExp', dataPoints, alpha);
 %
-% The output is the integrated ODE dose.
+% The output is the integrated OED dose.
 %
 %Example:
 % xp = 0:0.1:50;

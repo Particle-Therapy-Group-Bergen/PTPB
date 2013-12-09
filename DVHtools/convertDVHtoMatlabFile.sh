@@ -5,9 +5,9 @@ function PrintHelp {
 cat <<EOF
 Usage: convertDVHtoMatlabFile.sh [options] filename [filename filename ...]
 
-Converts one or more DVH input files into Octave .mat files. These can be
-loaded much more quickly by Octave than parsing the raw DVH files with a
-Matlab script.
+Converts one or more DVH input files into Octave .mat files using the readDVHfile function.
+Subsequently, the converted DVH input can be loaded  quicker by Octave compared to parsing 
+the raw DVH files for each prosessing with a Matlab script.
 Each input file will be converted and written to a file with the same basename
 as the input file, but with the extension changed to .mat by default. For
 example, myfile.txt will converted and written to myfile.mat. 
@@ -31,6 +31,11 @@ The available options are:
         If specified verbose information messages are printed as the files are
         converted. Specify multiple times on the command line to get more
         verbose output.
+
+Shell script - can run from outside octave
+
+Running example: convertDVHtoMatlabFile.sh -v DVHinput.txt
+
 EOF
 }
 

@@ -14,6 +14,10 @@ function listDoses(inputArg)
 % If a character string is given instead, it is assumed to be the name of a
 % Matlab workspace file containing a variable called 'DVH_data', which contains
 % the DVH data. The file is loaded and all organs listed.
+%
+% Running example: listDoses('DVHinput') or listDoses('DVHinput.mat')
+%
+
 
 if nargin == 0
     % Try fetch data from workspace if no arguments given:

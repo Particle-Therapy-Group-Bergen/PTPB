@@ -5,7 +5,7 @@ function dose = OED(responseModel, doseCumulative, varargin)
 % Calculates the Organ Equivalent Dose (OED) from the cumulative dose distribution data points.
 %
 %Where,
-% responseModel can be either 'LNT', 'PlateauHall' or 'LinExp'.
+% responseModel can be either 'LNT', 'PlateauHall', 'LinExp' or 'Competition'.
 %
 % doseCumulative are the cumulative dose distribution data points as a function of dose (dose on x-axis).
 %
@@ -64,6 +64,8 @@ switch responseModel
         integrand = @(x) PlateauHall(x, doseCumulative, interpMethod, integrandParams{:});
     case 'LinExp'
         integrand = @(x) LinExp(x, doseCumulative, interpMethod, integrandParams{:});
+    case 'Competition'
+        integrand = @(x) Competition(x, doseCumulative, interpMethod, integrandParams{:});
     otherwise
         error('Unknown response model type "%s".', responseModel);
 end
@@ -127,4 +129,11 @@ return;
 function y = LinExp(x, doseCumulative, interpMethod, alpha)
 d = doseInterpolate(x, doseCumulative, interpMethod);
 y = d.*exp(-alpha.*d);
+return;
+
+
+function y = Competition(x, doseCumulative, interpMethod, alpha1, beta1, alpha2, beta2, n)
+% n is the number of dose fractions.
+d = doseInterpolate(x, doseCumulative, interpMethod);
+y = (d + beta1./alpha1.*d.^2./n).*exp(-(alpha2.*d + beta2.*d.^2./n));
 return;

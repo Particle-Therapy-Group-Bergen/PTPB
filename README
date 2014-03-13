@@ -1,3 +1,22 @@
 Particle Therapy Project Bergen (PTPB) - tools and models for research in
 cancer therapy using photons, protons and heavy ions
 
+Directory layout:
+=================
+
+DVHtools/
+    This contains scripts used to convert DVH text files to variables stored
+    in a Matlab workspace .mat file. Also some utility functions are provided
+    to query some basic information about the contents of a DVH file.
+
+Models/
+    Contains Matlab scripts that implement functions for the core models.
+    These include Organ Equivalent Dose (OED) calculations and slope factor
+    calculations.
+
+examples/
+    Here you will find some example scripts that should how to use the different
+    functions and tools implemented in this code module.
+
+templates/
+    This contains some template files to use for code development.

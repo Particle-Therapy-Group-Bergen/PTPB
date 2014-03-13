@@ -1,5 +1,26 @@
-function result = calculateOEDs(filename, integration_method, integration_tolerance)
-%function result = calculateOEDs(filename, integration_method, integration_tolerance)
+function result = calculateOEDs(filename, organ, integration_method, integration_tolerance)
+%function result = calculateOEDs(filename, organ, integration_method, integration_tolerance)
+%
+% This script is an example for calculating OED values for different organs found
+% in a DVH file converted into a .mat workspace file. The converted file should contain
+% the DVH_data variable.
+% One can convert DVH files to this format using the convertDVHtoMatlabFile.sh script
+% found in the DVHtools directory.
+%
+% This function takes the following parameters:
+%  filename - The name of the .mat file to load and calculate from.
+%  organ    - If a organ name is given then the calculation is only done for that organ.
+%  integration_method - The integration method to use, if none is given then 'quad' is used.
+%                       Refer to the ODE function for details about possible options.
+%  integration_tolerance - The tollerance threshold to pass to the integration routine.
+%
+% Example usage to calculate for all organs using 'trapz' method and 1e-4 tollerance:
+%
+%  x = calculateOEDs('data.mat', {}, 'trapz', 1e-4);
+%
+% or just for lungs:
+%
+%  x = calculateOEDs('data.mat', 'Lungs', 'trapz', 1e-4);
 
 
 % The following table remaps the names in the DVH files to standard ones:
@@ -14,16 +35,16 @@ organnames = {
 % The following table maps different parameters to use for different model calculations.
 %
 %            The name of the    Threshold        Alpha        Competition model parameters
-%            organ used in      parameter for    parameter                                  integrations
-%            the DVH files.     PlateauHall.     for LinExp.  alpha1  beta1  alpha2  beta2     (n)
+%            organ used in      parameter for    parameter                                         integrations
+%            the DVH files.     PlateauHall.     for LinExp.  alpha1  beta1       alpha2  beta2       (n)
 organtable = {
-              {'Stomach',            4,           0.149,      0,      0,     0,      0,      1},
-              {'Colon',              4,           0.24,       0,      0,     0,      0,      1},
-              {'Liver',              4,           0.487,      0,      0,     0,      0,      1},
-              {'Lungs',              4,           0.129,      0,      0,     0,      0,      1},
-              {'Bladder',            4,           1.592,      0,      0,     0,      0,      1},
-              {'Thyroid',            4,           0.033,      0,      0,     0,      0,      1},
-              {'Prostate',           4,           0.804,      0,      0,     0,      0,      1},
+              {'Stomach',            4,           0.149,      0,      0,          0,      0,         1},
+              {'Colon',              4,           0.24,       0,      0,          0,      0,         1},
+              {'Liver',              4,           0.487,      0,      0,          0,      0,         1},
+              {'Lungs',              4,           0.129,      0.017,  0.017/4.5,  0.25,   0.25/4.5,  1},
+              {'Bladder',            4,           1.592,      0,      0,          0,      0,         1},
+              {'Thyroid',            4,           0.033,      0,      0,          0,      0,         1},
+              {'Prostate',           4,           0.804,      0,      0,          0,      0,         1},
   };
 
 
@@ -61,12 +82,19 @@ end
 doseResults = {};
 resultCount = 1;
 organs = data.DVH_data.structures;
+one_organ_found = 0;
 for n = 1:length(organs)
   s = organs{n};
   % Try map the name to a standard one.
   if isfield(organnamemap, s.structName)
     s.structName = getfield(organnamemap, s.structName);
   end
+  if exist('organ')
+    if ~ strcmp(organ, s.structName)
+      continue;
+    end
+  end
+  one_organ_found = 1;
 
   % Check if we can handle this organ.
   if ~ isfield(organmap, s.structName)
@@ -163,6 +191,10 @@ for n = 1:length(organs)
   resultCount = resultCount + 1;
   doseResults{resultCount} = struct(resultsRow{:});
   resultCount = resultCount + 1;
+end
+
+if one_organ_found == 0
+  printf('No organs found.');
 end
 
 result = struct(doseResults{:});

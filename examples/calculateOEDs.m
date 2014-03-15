@@ -28,7 +28,7 @@ function result = calculateOEDs(filename, organ, integration_method, integration
 %    Particle Therapy Project Bergen (PTPB) - tools and models for research in
 %    cancer therapy using particle beams.
 %
-%    Copyright (C) 2013 Particle Therapy Group Bergen
+%    Copyright (C) 2014 Particle Therapy Group Bergen
 %
 %    This program is free software: you can redistribute it and/or modify
 %    it under the terms of the GNU General Public License as published by

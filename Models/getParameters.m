@@ -1,0 +1,97 @@
+function result = getParameters(varargin)
+%result = getParameters(name, [name, ...])
+%
+% Returns model parameters and their uncertainty ranges used in dose and risk calculations.
+% Parameters are returned by named fields in a structure, including their uncertainty range
+% as [range_low .. range_high].
+% The one or more names of parameter sets to return can can be given, in which case only a subset
+% of the parameters is returned. If no names are given then all parameters are returned.
+% Possible named parameter sets include:
+%   histogram_uncertainty - Parameters indicating the uncertainties for the histogram binning.
+%   plateau_threshold - The threshold values for Hall's plateau model.
+%   linexp_alphas - The alpha parameters for the linear-exponential model.
+%   competition_params - Parameters for the competition model.
+
+if nargin == 0
+  names = {
+      'histogram_uncertainty',
+      'plateau_threshold',
+      'linexp_alphas',
+      'competition_params'
+    };
+else
+  names = varargin;
+end
+
+% Histogram uncertainties
+histogram_uncertainty = {
+%   dose binning    Data point (y)
+%   uncertainty     uncertainty
+       0.05,            1e-6
+  };
+
+% Plateau Hall parameters per organ:
+plateau_threshold = {
+%                            Uncertainty
+%    Organ name    Value    Low     High
+    {'Stomach',      4,    -0.1,    0.1},
+    {'Colon',        4,    -0.1,    0.1},
+    {'Liver',        4,    -0.1,    0.1},
+    {'Lungs',        4,    -0.1,    0.1},
+    {'Bladder',      4,    -0.1,    0.1},
+    {'Thyroid',      4,    -0.1,    0.1},
+    {'Prostate',     4,    -0.1,    0.1},
+  };
+
+% Linear-exponential model alpha parameters per organ:
+linexp_alphas = {
+%                              Uncertainty
+%    Organ name    Value     Low       High
+    {'Stomach',    0.149,   -0.001,   0.001},
+    {'Colon',      0.24,    -0.001,   0.001},
+    {'Liver',      0.487,   -0.001,   0.001},
+    {'Lungs',      0.129,   -0.001,   0.001},
+    {'Bladder',    1.592,   -0.001,   0.001},
+    {'Thyroid',    0.033,   -0.001,   0.001},
+    {'Prostate',   0.804,   -0.001,   0.001},
+  };
+
+% Competition model alpha and alpha/beta ratio parameters per organ:
+competition_params = {
+%                            Uncertainty              Uncertainty   alpha/beta   Uncertainty
+%    Organ name   alpha1    Low     High   alpha2    Low     High     ratio      Low    High
+    {'Lungs',     0.017,  -0.001,  0.001,   0.25,   -0.01,   0.01,     4.5,     -0.1,   0.1},
+  };
+
+
+result = struct;
+for n = 1:length(names)
+  name = names{n};
+  if ~ ischar(name)
+    error('Expected a string for input parameter %d.', n);
+  end
+  switch name
+    case 'histogram_uncertainty'
+      result.dose_binning_uncertainty = histogram_uncertainty{1};
+      result.volume_ratio_uncertainty = histogram_uncertainty{2};
+    case 'plateau_threshold'
+      for k = 1:length(plateau_threshold)
+        p = plateau_threshold{k};
+        result.(p{1}).plateau_threshold = struct('value', p{2}, 'range_low', p{2}+p{3}, 'range_high', p{2}+p{4});
+      end
+    case 'linexp_alphas'
+      for k = 1:length(linexp_alphas)
+        p = linexp_alphas{k};
+        result.(p{1}).linexp_alpha = struct('value', p{2}, 'range_low', p{2}+p{3}, 'range_high', p{2}+p{4});
+      end
+    case 'competition_params'
+      for k = 1:length(competition_params)
+        p = competition_params{k};
+        result.(p{1}).competition_alpha1 = struct('value', p{2}, 'range_low', p{2}+p{3}, 'range_high', p{2}+p{4});
+        result.(p{1}).competition_alpha2 = struct('value', p{5}, 'range_low', p{5}+p{6}, 'range_high', p{5}+p{7});
+        result.(p{1}).competition_alpha_beta_ratio = struct('value', p{8}, 'range_low', p{8}+p{9}, 'range_high', p{8}+p{10});
+      end
+    otherwise
+      error('Unknown parameter set name %s.', name);
+  end
+end

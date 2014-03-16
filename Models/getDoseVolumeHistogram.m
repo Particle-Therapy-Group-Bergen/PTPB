@@ -13,10 +13,10 @@ function result = getDoseVolumeHistogram(filename, varargin)
 %
 %Parameters:
 % filename - The name of the .mat file to load the data from.
-% name_map - A structure mapping the names of the structures in the file to
-%            standard values. The field names of the structure are treated as
-%            the keys (the names in the file) and the values should be strings
-%            (the standard names to map to).
+% name_map - A Nx2 cell array forming key-value pairs that map the names of the
+%            organ structures in the file to standard values. The first column
+%            of the cell array is treated as the key (the names in the file) and
+%            the second column as the values (the standard names to map to).
 % organ - One or more optional organ names can be passed to indicate specific
 %         structures to load from the file. If no organs are explicitly given
 %         then all are loaded and returned.
@@ -47,9 +47,12 @@ function result = getDoseVolumeHistogram(filename, varargin)
 % Authors: Artur Szostak <artursz@iafrica.com>
 
 % Get the organ name map if it was given in the list of arguments.
-if length(varargin) > 0 && isstruct(varargin{1})
+if length(varargin) > 0 && iscell(varargin{1})
   poffset = 1;
   organ_name_map = varargin{1};
+  if size(organ_name_map)(2) ~= 2
+    error('The name_map parameter must be a Nx2 cell matrix.');
+  end
   search_names = varargin(2:length(varargin));
 else
   poffset = 0;
@@ -81,8 +84,11 @@ for n = 1:length(organs)
   extra_error = 0;
 
   % Try map the name to a standard one if we have a mapping structure.
-  if exist('organ_name_map') && isfield(organ_name_map, organ_name)
-    organ_name = organ_name_map.(organ_name);
+  if exist('organ_name_map')
+    pos = strmatch(organ_name, organ_name_map{:,1});
+    if length(pos) > 0
+      organ_name = organ_name_map{pos(1),2};
+    end
   end
 
   % If we have a search list of organs to find, then check if this current one is in it.

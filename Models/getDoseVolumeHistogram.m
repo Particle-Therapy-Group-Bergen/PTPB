@@ -48,9 +48,11 @@ function result = getDoseVolumeHistogram(filename, varargin)
 
 % Get the organ name map if it was given in the list of arguments.
 if length(varargin) > 0 && isstruct(varargin{1})
+  poffset = 1;
   organ_name_map = varargin{1};
   search_names = varargin(2:length(varargin));
 else
+  poffset = 0;
   search_names = varargin;
 end
 
@@ -58,7 +60,7 @@ end
 % Will update this later to 1 as the organs are found in the file.
 for n = 1:length(search_names)
   if ~ ischar(search_names{n})
-    error('Expected parameter %d to be a string; an organ name to search for in the data file.', n);
+    error('Expected parameter %d to be a string; an organ name to search for in the data file.', n+poffset);
   end
   search_list.(search_names{n}) = 0;
 end
@@ -142,9 +144,9 @@ for n = 1:length(organs)
   dose_min = organs{n}.dose - params.dose_binning_uncertainty;
   dose_min = dose_min .* (dose_min > 0);   % force lower bound to zero.
   dose_max = organs{n}.dose + params.dose_binning_uncertainty;
-  ratio_min = organs{n}.ratioToTotalVolume - params.volume_ratio_uncertainty;
+  ratio_min = organs{n}.ratioToTotalVolume - params.volume_ratio_uncertainty - extra_error;
   ratio_min = ratio_min .* (0 < ratio_min);   % force lower bound to zero.
-  ratio_max = organs{n}.ratioToTotalVolume + params.volume_ratio_uncertainty;
+  ratio_max = organs{n}.ratioToTotalVolume + params.volume_ratio_uncertainty + extra_error;
   ratio_max = ratio_max .* (ratio_max < 1) + (ratio_max >= 1);   % force upper bound to 1.
 
   % Adjust the limits so that the uncertainty ranges do not overlap between data points.

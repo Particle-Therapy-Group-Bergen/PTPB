@@ -50,7 +50,7 @@ function result = getDoseVolumeHistogram(filename, varargin)
 if length(varargin) > 0 && iscell(varargin{1})
   poffset = 1;
   organ_name_map = varargin{1};
-  if size(organ_name_map)(2) ~= 2
+  if size(organ_name_map, 2) ~= 2
     error('The name_map parameter must be a Nx2 cell matrix.');
   end
   search_names = varargin(2:length(varargin));

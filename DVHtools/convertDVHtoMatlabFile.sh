@@ -55,7 +55,7 @@ The available options are:
         Will overwrite output files if they exit without prompting the user.
 
     --verbose | -v
-        If specified verbose information messages are printed as the files are
+        If specified, verbose information messages are printed as the files are
         converted. Specify multiple times on the command line to get more
         verbose output.
 

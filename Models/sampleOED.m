@@ -26,6 +26,8 @@ function result = sampleOED(nsamples, filename, organs, models, options)
 %      'print_progress' - Integer indicating if progress information should be printed.
 %                         Higher values give more verbosity. (default 0)
 %      'debug_function' - Boolean indicating if extra debug checking should be performed. (default 0)
+%      'struct_output' - Boolean value to force output to be in a full structure even if only dealing
+%                         with one organ or model. (default 0)
 %      'dosevolume_uncertainty_model' - Uncertainty distribution model to use for the dose volume
 %                         histogram data points. Possible values: 'box', 'triangle' (default 'box')
 %      'parameter_uncertainty_model' - Uncertainty distribution model to use for the model parameters.
@@ -72,6 +74,7 @@ end
 % Unpack the options structure and set defaults if needed.
 print_progress = 0;
 debug_function = 0;
+struct_output = 0;
 dosevolume_uncertainty_model = 'box';
 parameter_uncertainty_model = 'box';
 integration_method = 'trapz';
@@ -87,6 +90,9 @@ if exist('options')
   end
   if isfield(options, 'debug_function')
     debug_function = options.debug_function;
+  end
+  if isfield(options, 'struct_output')
+    struct_output = options.struct_output;
   end
   if isfield(options, 'dosevolume_uncertainty_model')
     dosevolume_uncertainty_model = options.dosevolume_uncertainty_model;
@@ -273,12 +279,18 @@ for k = 1:length(names)
   end
 end
 
-% Return simplified format if only one field exists in the structure.
-if length(fieldnames(result)) == 1
-  result = result.(fieldnames(result){1});
-end
-if length(fieldnames(result)) == 1
-  result = result.(fieldnames(result){1});
+if struct_output == 0
+  % Return simplified format if only one field exists in the structure.
+  if length(models) == 1
+    names = fieldnames(result);
+    for n = 1:length(names)
+      subresults = result.(names{n});
+      result.(names{n}) = subresults.(fieldnames(subresults){1});
+    end
+  end
+  if length(fieldnames(result)) == 1
+    result = result.(fieldnames(result){1});
+  end
 end
 
 return;

@@ -35,7 +35,7 @@ function result = sampleOED(nsamples, filename, organs, models, options)
 %      'integration_method' - The integration method to use. Refer to "help OED" for a list of valid
 %                         options. (default 'trapz')
 %      'integration_tolerance' - The error tolerance level to use for the integration. (default 1e-4)
-%      'integration_method' - The interpolation method to use. Refer to "help interp1" for a list of
+%      'interpolation_method' - The interpolation method to use. Refer to "help interp1" for a list of
 %                         valid values. (default 'linear')
 %      'dose_fractions' - The dose fraction value to use for the Competition models.
 %

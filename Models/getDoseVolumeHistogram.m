@@ -85,7 +85,7 @@ for n = 1:length(organs)
 
   % Try map the name to a standard one if we have a mapping structure.
   if exist('organ_name_map')
-    pos = strmatch(organ_name, organ_name_map{:,1});
+    pos = strmatch(organ_name, {organ_name_map{:,1}}, 'exact');
     if length(pos) > 0
       organ_name = organ_name_map{pos(1),2};
     end

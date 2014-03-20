@@ -64,6 +64,12 @@ function result = sampleOED(nsamples, filename, organs, models, options)
 
 % Authors: Artur Szostak <artursz@iafrica.com>
 
+if nargin == 0
+    % Print help message if no arguments are given.
+    help sampleOED;
+    return;
+end
+
 if ~ exist('nsamples') || nsamples < 1
   error('Must provide the number of samples to generate with a value >= 1.');
 end
@@ -106,8 +112,8 @@ if exist('options')
   if isfield(options, 'integration_tolerance')
     integration_tolerance = options.integration_tolerance;
   end
-  if isfield(options, 'integration_method')
-    integration_method = options.integration_method;
+  if isfield(options, 'interpolation_method')
+    interpolation_method = options.interpolation_method;
   end
   if isfield(options, 'dose_fractions')
     dose_fractions = options.dose_fractions;

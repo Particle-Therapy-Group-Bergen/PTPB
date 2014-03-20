@@ -252,6 +252,8 @@ for k = 1:length(names)
         % Plot the points for debugging:
         oldpoints = doseVolumeHistos.(names{k}).datapoints;
         plot(oldpoints(:,2), oldpoints(:,1), '+', datapoints(:,2), datapoints(:,1), 'o');
+        printf('Press enter to continue...\n');
+        pause;
       end
 
       if isempty(mp_jittered_values)

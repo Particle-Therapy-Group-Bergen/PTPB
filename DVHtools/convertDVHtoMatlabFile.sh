@@ -67,12 +67,8 @@ EOF
 }
 
 
-# Get the path of the readDVHfile.m script. This should be in the same location
-# as this script. We use the 'which' command to locate the path of this script,
-# and $0 will contain its name.
-
-MFILE_PATH=`which $0`
-MFILE_PATH=`dirname $MFILE_PATH`
+# The path of the readDVHfile.m script. It is setup by the "Makefile install" target.
+MFILE_PATH="@@MFILE_PATHR@@"
 
 # Run through the list of arguments once to parse the options.
 OUTPUT_FILENAME=""
@@ -133,7 +129,7 @@ if test -z "$OUTPUT_SUFFIX" ; then
     OUTPUT_SUFFIX="mat"
 fi
 
-VERBOSE_OCTAVE=
+VERBOSE_OCTAVE="--silent"
 if test "$VERBOSE_COUNT" -gt 2 ; then
     VERBOSE_OCTAVE="--verbose"
 fi

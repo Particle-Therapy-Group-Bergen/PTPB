@@ -141,6 +141,30 @@ save '$OUTFILE' OED_samples;
 EOF
 }
 
+# Generates Matlab commands to merge files.
+function MakeMergeScript {
+cat << EOF
+try
+  indata = load('$INFILE', 'OED_samples');
+  outdata = load('$OUTFILE', 'OED_samples');
+catch
+  error("%s. \`OED_samples' structure not found in file.", lasterror.message);
+end
+OED_samples = outdata.OED_samples;
+organs = fieldnames(indata.OED_samples);
+for n = 1:length(organs)
+  organname = organs{n}
+  models = fieldnames(indata.OED_samples.(organname));
+  for m = 1:length(models)
+    modelname = models{m}
+    x = indata.OED_samples.(organname).(modelname);
+    OED_samples.(organname).(modelname) = [OED_samples.(organname).(modelname); x];
+  end
+end
+save '$OUTFILE' OED_samples;
+EOF
+}
+
 
 # The path of the Matlab .m files. It is setup by the "Makefile install" target.
 MFILE_PATH="@@MFILE_PATHR@@"
@@ -165,6 +189,7 @@ INTEGRATION_METHOD="trapz"
 INTEGRATION_TOLERANCE=1e-4
 INTERPOLATION_METHOD="linear"
 DOSE_FRACTIONS=1
+MERGE_RESULTS=no
 
 # Parse the command line parameters.
 for ARG ; do
@@ -176,15 +201,15 @@ for ARG ; do
     --output=*|-o=*)
       OUTPUT_FILENAME=`echo "$ARG" | sed 's|-.*=||'`;
       if test -z "$OUTPUT_FILENAME" ; then
-          echo "ERROR: No output file name given for option '$ARG'." 1>&2
-          exit 2
+        echo "ERROR: No output file name given for option '$ARG'." 1>&2
+        exit 2
       fi
       ;;
     --suffix=*|-s=*)
       OUTPUT_SUFFIX=`echo "$ARG" | sed 's|-.*=||'`
       if test -z "$OUTPUT_SUFFIX" ; then
-          echo "ERROR: No suffix given for option '$ARG'." 1>&2
-          exit 2
+        echo "ERROR: No suffix given for option '$ARG'." 1>&2
+        exit 2
       fi
       ;;
     --force|-f)
@@ -202,8 +227,8 @@ for ARG ; do
     --organ=*|-g=*)
       ORGAN=`echo "$ARG" | sed 's|-.*=||'`
       if test -z "$ORGAN" ; then
-          echo "ERROR: No organ name given for option '$ARG'." 1>&2
-          exit 2
+        echo "ERROR: No organ name given for option '$ARG'." 1>&2
+        exit 2
       fi
       if test -z "$ORGANS" ; then
         ORGANS="'$ORGAN'"
@@ -216,12 +241,12 @@ for ARG ; do
       KEY=`echo "$KEYVAL" | sed 's|:.*$||'`
       VALUE=`echo "$KEYVAL" | sed 's|^.*:||'`
       if test -z "$KEY" ; then
-          echo "ERROR: No key given for mapping option '$ARG'." 1>&2
-          exit 2
+        echo "ERROR: No key given for mapping option '$ARG'." 1>&2
+        exit 2
       fi
       if test -z "$VALUE" ; then
-          echo "ERROR: No value given for mapping option '$ARG'." 1>&2
-          exit 2
+        echo "ERROR: No value given for mapping option '$ARG'." 1>&2
+        exit 2
       fi
       if test -z "$ORGAN_MAP" ; then
         ORGAN_MAP="'$KEY','$VALUE'"
@@ -232,8 +257,8 @@ for ARG ; do
     --model=*|-m=*)
       MODEL=`echo "$ARG" | sed 's|-.*=||'`
       if test -z "$MODEL" ; then
-          echo "ERROR: No model name given for option '$ARG'." 1>&2
-          exit 2
+        echo "ERROR: No model name given for option '$ARG'." 1>&2
+        exit 2
       fi
       if test -z "$MODELS" ; then
         MODELS="'$MODEL'"
@@ -262,11 +287,14 @@ for ARG ; do
     --dose-fractions=*|-k=*)
       DOSE_FRACTIONS=`echo "$ARG" | sed 's|-.*=||'`
       ;;
+    --merge|-e)
+      MERGE_RESULTS=yes
+      ;;
     *)
       # Check if the file exits:
       if test ! -f "$ARG" ; then
-          echo "ERROR: The file '$ARG' could not be found." 1>&2
-          exit 1
+        echo "ERROR: The file '$ARG' could not be found." 1>&2
+        exit 1
       fi
       let FILE_COUNT++
       ;;
@@ -276,14 +304,20 @@ done
 
 # Check that we got at least one input file.
 if test "$FILE_COUNT" -eq 0 ; then
-    echo "ERROR: No input files given." 1>&2
-    PrintHelp
-    exit 1
+  echo "ERROR: No input files given." 1>&2
+  PrintHelp
+  exit 1
 fi
 
-if test "$FILE_COUNT" -gt 1 -a -n "$OUTPUT_FILENAME" ; then
+if test "$MERGE_RESULTS" = "yes" ; then
+  if test -z "$OUTPUT_FILENAME" ; then
+    OUTPUT_FILENAME="merged_OED_results.mat"
+  fi
+else
+  if test "$FILE_COUNT" -gt 1 -a -n "$OUTPUT_FILENAME" ; then
     echo "ERROR: Cannot use --option | -o if more than one input file is given." 1>&2
     exit 2
+  fi
 fi
 
 VERBOSE_OCTAVE="--silent"
@@ -306,35 +340,57 @@ for ARG ; do
     --map=*|-a=*|--debug=*|-d=*|--debug|-d|--model=*|-m=*|--samples=*|-n=*) ;;
     --dose-volume-uncertainty-model=*|-u=*|--parameter-uncertainty-model=*|-p=*) ;;
     --integration-method=*|-i=*|--integration-tolerance=*|-t=*) ;;
-    --interpolation-method=*|-j=*|--dose-fractions=*|-k=*) ;;
+    --interpolation-method=*|-j=*|--dose-fractions=*|-k=*|--merge|-e) ;;
 
     *)
       # Assume this argument is an input filename, so process it.
+      SCRIPT=""
       INFILE="$ARG"
       if test -n "$OUTPUT_FILENAME" ; then
-          OUTFILE="$OUTPUT_FILENAME"
+        OUTFILE="$OUTPUT_FILENAME"
       else
-          OUTFILE="`dirname $INFILE`/`basename $INFILE | sed 's|\..*||'`$OUTPUT_SUFFIX"
+        OUTFILE="`dirname $INFILE`/`basename $INFILE | sed 's|\..*||'`$OUTPUT_SUFFIX"
       fi
       if test "$VERBOSE_COUNT" -gt 0 ; then
-          echo "$INFILE => $OUTFILE"
+        echo "$INFILE => $OUTFILE"
       fi
-      if test -f "$OUTFILE" ; then
-          if test "$FORCE_OVERWRITE" = no ; then
-              echo "WARNING: File '$OUTFILE' already exists so skipping creation." 1>&2
-              continue
+
+      if test "$MERGE_RESULTS" = "yes" ; then
+        # Setup script to merge multiple files into the output.
+        if test -f "$OUTFILE" ; then
+          if test "$DEBUG_FLAG" -gt 0 ; then
+            echo "============================== Matlab script ================================="
+            MakeMergeScript
+            echo "=============================================================================="
           fi
-      fi
-      if test "$DEBUG_FLAG" -gt 0 ; then
-        echo "============================== Matlab script ================================="
-        MakeScript
-        echo "=============================================================================="
-      fi
-      SCRIPT=`MakeScript`
-      if test "$VERBOSE_COUNT" -gt 1 -o "$DEBUG_FUNCTION" -gt 0 ; then
-        octave $VERBOSE_OCTAVE --path "$MFILE_PATH" --eval "$SCRIPT"
+          SCRIPT=`MakeMergeScript`
+        else
+          # Just copy the first file over. The next time it will be merged.
+          cp "$INFILE" "$OUTFILE"
+        fi
       else
-        octave $VERBOSE_OCTAVE --path "$MFILE_PATH" --eval "$SCRIPT" > /dev/null
+        # Setup script to calculate OED values per file.
+        if test -f "$OUTFILE" ; then
+          if test "$FORCE_OVERWRITE" = no ; then
+            echo "WARNING: File '$OUTFILE' already exists so skipping creation." 1>&2
+            continue
+          fi
+        fi
+        if test "$DEBUG_FLAG" -gt 0 ; then
+          echo "============================== Matlab script ================================="
+          MakeScript
+          echo "=============================================================================="
+        fi
+        SCRIPT=`MakeScript`
+      fi
+
+      # Actually execute the script at this point.
+      if test -n "$SCRIPT" ; then
+        if test "$VERBOSE_COUNT" -gt 1 -o "$DEBUG_FUNCTION" -gt 0 ; then
+          octave $VERBOSE_OCTAVE --path "$MFILE_PATH" --eval "$SCRIPT"
+        else
+          octave $VERBOSE_OCTAVE --path "$MFILE_PATH" --eval "$SCRIPT" > /dev/null
+        fi
       fi
       ;;
   esac

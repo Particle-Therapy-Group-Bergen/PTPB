@@ -22,8 +22,8 @@
 #
 ###############################################################################
 
-# This is script is used to generate Organ Equivalent Dose (OED) calculation
-# sample, by randomly sampling the undertainty distributions of the input model
+# This script is used to generate Organ Equivalent Dose (OED) calculation
+# samples, by randomly sampling the undertainty distributions of the input model
 # parameters and dose volume histogram data points.
 # This allows estimation of propagated uncertainties using a monte carlo method.
 

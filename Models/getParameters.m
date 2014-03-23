@@ -59,26 +59,28 @@ histogram_uncertainty = {
 plateau_threshold = {
 %                            Uncertainty
 %    Organ name    Value    Low     High
-    {'Stomach',      4,    -0.1,    0.1},
-    {'Colon',        4,    -0.1,    0.1},
-    {'Liver',        4,    -0.1,    0.1},
-    {'Lungs',        4,    -0.1,    0.1},
-    {'Bladder',      4,    -0.1,    0.1},
-    {'Thyroid',      4,    -0.1,    0.1},
-    {'Prostate',     4,    -0.1,    0.1},
+    {'Stomach',      4.5,  -0.5,    0.5},
+    {'Colon',        4.5,  -0.5,    0.5},
+    {'Bone',         4.5,  -0.5,    0.5},
+    {'Liver',        4.5,  -0.5,    0.5},
+    {'Lungs',        4.5,  -0.5,    0.5},
+    {'Bladder',      4.5,  -0.5,    0.5},
+    {'Thyroid',      4.5,  -0.5,    0.5},
+    {'Prostate',     4.5,  -0.5,    0.5},
   };
 
 % Linear-exponential model alpha parameters per organ:
 linexp_alphas = {
 %                              Uncertainty
 %    Organ name    Value     Low       High
-    {'Stomach',    0.149,   -0.001,   0.001},
-    {'Colon',      0.24,    -0.001,   0.001},
-    {'Liver',      0.487,   -0.001,   0.001},
-    {'Lungs',      0.129,   -0.001,   0.001},
-    {'Bladder',    1.592,   -0.001,   0.001},
-    {'Thyroid',    0.033,   -0.001,   0.001},
-    {'Prostate',   0.804,   -0.001,   0.001},
+    {'Stomach',    0.149,   -0.013,   0.014},
+    {'Colon',      0.240,   -0.061,   0.075},
+    {'Bone',       0.033,   -0.027,   0.043},
+    {'Liver',      0.487,   -0.252,   0.385},
+    {'Lungs',      0.129,   -0.012,   0.016},
+    {'Bladder',    1.592,   -0.356,   0.434},
+    {'Thyroid',    0.033,   -0.013,   0.014},
+    {'Prostate',   0.804,   -0.496,   0.622},
   };
 
 % Competition model alpha and alpha/beta ratio parameters per organ:

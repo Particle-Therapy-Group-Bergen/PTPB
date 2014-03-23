@@ -49,6 +49,7 @@ else
 end
 
 % Histogram uncertainties
+% Estimated from the binning and significant figures in the DVH file data.
 histogram_uncertainty = {
 %   dose binning    Data point (y)
 %   uncertainty     uncertainty
@@ -70,6 +71,12 @@ plateau_threshold = {
   };
 
 % Linear-exponential model alpha parameters per organ:
+% Taken from table 1, Schneider et. al. 2005 paper:
+%  "Estimation of radiation-induced cancer from three-dimensional dose
+%   distributions: Concept of organ equivalent dose"
+%  International journal of radiation oncology, biology, physics,
+%  1 April 2005 (volume 61 issue 5 Pages 1510-1515
+%  DOI: 10.1016/j.ijrobp.2004.12.040)
 linexp_alphas = {
 %                              Uncertainty
 %    Organ name    Value     Low       High

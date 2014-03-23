@@ -73,6 +73,7 @@ make_header = ~ $NO_HEADER;
 print_percent = $AS_PERCENT;
 print_filename = $PRINT_FILENAME;
 data = load('$INFILE', 'OED_samples');
+% Print the header.
 if make_header
   if print_percent
     if print_filename
@@ -88,15 +89,7 @@ if make_header
     end
   end
 end
-% Count the number of rows.
-count = 0;
-organs = fieldnames(data.OED_samples);
-for n = 1:length(organs)
-  organ = organs{n};
-  models = fieldnames(data.OED_samples.(organ));
-  count += length(models);
-end
-% Now print the rows.
+% Now print the data rows.
 organs = fieldnames(data.OED_samples);
 for n = 1:length(organs)
   organ = organs{n};
@@ -105,7 +98,6 @@ for n = 1:length(organs)
     model = models{m};
     x = data.OED_samples.(organ).(model);
     x = x($RANGE);
-    count--;
     mean_x = mean(x);
     if print_percent
       std_x = std(x) / mean_x * 100;
@@ -116,18 +108,10 @@ for n = 1:length(organs)
       min_x = min(x);
       max_x = max(x);
     end
-    if (count > 0)
-      if print_filename
-        printf('%12g%12g%12g%12g%12d%20s%20s  %s\n', mean_x, std_x, min_x, max_x, length(x), organ, model, '$INFILE');
-      else
-        printf('%12g%12g%12g%12g%12d%20s%20s\n', mean_x, std_x, min_x, max_x, length(x), organ, model);
-      end
+    if print_filename
+      printf('%12g%12g%12g%12g%12d%20s%20s  %s\n', mean_x, std_x, min_x, max_x, length(x), organ, model, '$INFILE');
     else
-      if print_filename
-        printf('%12g%12g%12g%12g%12d%20s%20s  %s', mean_x, std_x, min_x, max_x, length(x), organ, model, '$INFILE');
-      else
-        printf('%12g%12g%12g%12g%12d%20s%20s', mean_x, std_x, min_x, max_x, length(x), organ, model);
-      end
+      printf('%12g%12g%12g%12g%12d%20s%20s\n', mean_x, std_x, min_x, max_x, length(x), organ, model);
     end
   end 
 end

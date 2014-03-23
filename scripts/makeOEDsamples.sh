@@ -313,6 +313,12 @@ if test "$MERGE_RESULTS" = "yes" ; then
   if test -z "$OUTPUT_FILENAME" ; then
     OUTPUT_FILENAME="merged_OED_results.mat"
   fi
+  if test -f "$OUTPUT_FILENAME" ; then
+    if test "$FORCE_OVERWRITE" = no ; then
+      echo "WARNING: File '$OUTPUT_FILENAME' already exists so skipping creation." 1>&2
+      exit
+    fi
+  fi
 else
   if test "$FILE_COUNT" -gt 1 -a -n "$OUTPUT_FILENAME" ; then
     echo "ERROR: Cannot use --option | -o if more than one input file is given." 1>&2

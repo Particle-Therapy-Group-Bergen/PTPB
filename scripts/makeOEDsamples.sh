@@ -59,7 +59,7 @@ The available options are:
         Will overwrite output files if they exit without prompting the user.
 
     --organ=<name> | -g=<name>
-        Specifies a organ to process in the data file.  Multiple values can be
+        Specifies an organ to process in the data file.  Multiple values can be
         given. If no values are given then the script tries to process all
         organs found in the data file.
 

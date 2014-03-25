@@ -151,7 +151,7 @@ for ARG ; do
             if test -n "$OUTPUT_FILENAME" ; then
                 OUTFILE="$OUTPUT_FILENAME"
             else
-                OUTFILE="`dirname $INFILE`/`basename $INFILE | sed 's|\..*||'`.$OUTPUT_SUFFIX"
+                OUTFILE="`dirname $INFILE`/`basename $INFILE | sed 's|\.[^\.]*$||'`.$OUTPUT_SUFFIX"
             fi
             if test "$VERBOSE_COUNT" -gt 0 ; then
                 echo "$INFILE => $OUTFILE"

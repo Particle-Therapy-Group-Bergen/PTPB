@@ -137,7 +137,7 @@ options.integration_tolerance = $INTEGRATION_TOLERANCE;
 options.interpolation_method = '$INTERPOLATION_METHOD';
 options.dose_fractions = $DOSE_FRACTIONS;
 OED_samples = sampleOED($NSAMPLES, '$INFILE', {$ORGANS}, {$MODELS}, options);
-save '$OUTFILE' OED_samples;
+save('-7', '$OUTFILE', 'OED_samples');
 EOF
 }
 
@@ -161,7 +161,7 @@ for n = 1:length(organs)
     OED_samples.(organname).(modelname) = [OED_samples.(organname).(modelname); x];
   end
 end
-save '$OUTFILE' OED_samples;
+save('-7', '$OUTFILE', 'OED_samples');
 EOF
 }
 

@@ -343,6 +343,11 @@ if test "$MAKE_EPS_FILE" = "yes" ; then
   gnuplot $GNUPLOT_SCRIPT
 fi
 
+# Check if we can stop at the eps because we already got the file with gnuplot.
+if test "`echo "$OUTPUT_FILENAME" | sed 's|^.*\(\.eps\)$|\1|'`" = ".eps" ; then
+  exit
+fi
+
 # If we expect a different final output file format then use ImageMagick to
 # convert the file. Note, we use a high dots per inch density to get good quality
 # for raster formats like PNG or JPEG.

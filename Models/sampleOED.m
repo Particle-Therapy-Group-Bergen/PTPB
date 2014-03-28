@@ -29,9 +29,10 @@ function result = sampleOED(nsamples, filename, organs, models, options)
 %      'struct_output' - Boolean value to force output to be in a full structure even if only dealing
 %                         with one organ or model. (default 0)
 %      'dosevolume_uncertainty_model' - Uncertainty distribution model to use for the dose volume
-%                         histogram data points. Possible values: 'box', 'triangle' (default 'box')
+%                         histogram data points. Possible values: 'box', 'triangle', 'extrema'
+%                         (default 'box')
 %      'parameter_uncertainty_model' - Uncertainty distribution model to use for the model parameters.
-%                         Possible values: 'box', 'triangle', 'gaussian' (default 'box')
+%                         Possible values: 'box', 'triangle', 'extrema', 'gaussian' (default 'box')
 %      'integration_method' - The integration method to use. Refer to "help OED" for a list of valid
 %                         options. (default 'trapz')
 %      'integration_tolerance' - The error tolerance level to use for the integration. (default 1e-4)
@@ -330,6 +331,8 @@ switch uncertainty_model
     result = randTriangle(range_low, range_high, datapoints);
   case 'box'
     result = randBox(range_low, range_high);
+  case 'extrema'
+    result = rand2state(range_low, range_high);
   otherwise
     error('The uncertainty distribution model "%s" is not supported.', uncertainty_model);
 end
@@ -344,6 +347,8 @@ switch uncertainty_model
     result = randTriangle(range_low, range_high, value);
   case 'box'
     result = randBox(range_low, range_high);
+  case 'extrema'
+    result = rand2state(range_low, range_high);
   case 'gaussian'
     result = randn(size(value)) .* 0.5 .* abs(range_high - range_low) + value;
   otherwise
@@ -368,4 +373,12 @@ function X = randBox(a, b)
 
 U = rand(size(a));
 X = (b-a).*U + a;
+return;
+
+
+function X = rand2state(a, b)
+% Generate random number matrix where each entry can have only one of 2 values: a or b.
+
+U = round( rand(size(a)) );
+X = a.*U + b.*(1-U);
 return;

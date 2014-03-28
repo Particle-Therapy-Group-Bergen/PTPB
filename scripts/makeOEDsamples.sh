@@ -80,11 +80,13 @@ The available options are:
 
     --dose-volume-uncertainty-model=<name> | -u=<name>
         Specifies the uncertainty distribution model to use for the dose volume
-        histogram data points. This must be one of: 'box' or 'triangle'
+        histogram data points. This must be one of: 'box', 'triangle' or
+        'extrema'
 
     --parameter-uncertainty-model=<name> | -p=<name>
         Specifies the uncertainty distribution model to use for the response
-        model parameters. This must be one of: 'box', 'triangle' or 'gaussian'.
+        model parameters. This must be one of: 'box', 'triangle', 'extrema' or
+        'gaussian'.
 
     --integration-method=<name> | -i=<name>
         Indicates the integration method to use. Can be one of the following

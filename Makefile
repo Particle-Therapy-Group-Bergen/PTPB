@@ -39,7 +39,7 @@ install:
 	mkdir -p $(PREFIX_DIR)/PTPB_mfiles/
 	install $(SCRIPT_FILES)  $(PREFIX_DIR)/
 	for SCRIPT in $(notdir $(SCRIPT_FILES)) ; do \
-		sed -i -e 's|@@MFILE_PATHR@@|$(PREFIX_DIR)/PTPB_mfiles|' $(PREFIX_DIR)/$$SCRIPT ; \
+		sed -i -e 's|@@MFILE_PATH@@|$(PREFIX_DIR)/PTPB_mfiles|' $(PREFIX_DIR)/$$SCRIPT ; \
 	done
 	install $(MATLAB_FILES) $(PREFIX_DIR)/PTPB_mfiles/
 	@echo "INFO: Consider adding the following line to your ~/.bashrc for more convenience when using the Matlab scripts:"

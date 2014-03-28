@@ -211,7 +211,7 @@ EOF
 
 
 # The path of the Matlab .m files. It is setup by the "Makefile install" target.
-MFILE_PATH="@@MFILE_PATHR@@"
+MFILE_PATH="@@MFILE_PATH@@"
 
 # Set some initial defaults.
 OUTPUT_FILENAME=""

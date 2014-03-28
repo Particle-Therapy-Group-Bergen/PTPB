@@ -68,7 +68,7 @@ EOF
 
 
 # The path of the readDVHfile.m script. It is setup by the "Makefile install" target.
-MFILE_PATH="@@MFILE_PATHR@@"
+MFILE_PATH="@@MFILE_PATH@@"
 
 # Run through the list of arguments once to parse the options.
 OUTPUT_FILENAME=""

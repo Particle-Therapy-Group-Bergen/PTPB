@@ -70,7 +70,7 @@ The available options are:
 
     --model=<name> | -m=<name>
         Gives the name of a response model to use for the OED calculation. More
-        than one model can be given. If not models are explicitly passed on the
+        than one model can be given. If no models are explicitly passed on the
         command line then the script tries to compute all possible models.
         The list of valid models includes: 'LNT', 'PlateauHall', 'LinExp' or
         'Competition'.

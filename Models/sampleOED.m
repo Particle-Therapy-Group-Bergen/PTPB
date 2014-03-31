@@ -29,10 +29,11 @@ function result = sampleOED(nsamples, filename, organs, models, options)
 %      'struct_output' - Boolean value to force output to be in a full structure even if only dealing
 %                         with one organ or model. (default 0)
 %      'dosevolume_uncertainty_model' - Uncertainty distribution model to use for the dose volume
-%                         histogram data points. Possible values: 'box', 'triangle', 'extrema'
-%                         (default 'box')
+%                         histogram data points. Possible values: 'delta', 'box', 'triangle',
+%                         'extrema' (default 'box')
 %      'parameter_uncertainty_model' - Uncertainty distribution model to use for the model parameters.
-%                         Possible values: 'box', 'triangle', 'extrema', 'gaussian' (default 'box')
+%                         Possible values: 'delta', 'box', 'triangle', 'extrema', 'gaussian'
+%                         (default 'box')
 %      'integration_method' - The integration method to use. Refer to "help OED" for a list of valid
 %                         options. (default 'trapz')
 %      'integration_tolerance' - The error tolerance level to use for the integration. (default 1e-4)
@@ -327,6 +328,8 @@ function result = sampleDoseVolumeHisto(datapoints, range_low, range_high, uncer
 % distribution given by the specified model.
 
 switch uncertainty_model
+  case 'delta'
+    result = datapoints;
   case 'triangle'
     result = randTriangle(range_low, range_high, datapoints);
   case 'box'
@@ -343,6 +346,8 @@ function result = sampleParameters(value, range_low, range_high, uncertainty_mod
 % Samples the uncertainty distributions for a parameter set, similar to sampleDoseVolumeHisto.
 
 switch uncertainty_model
+  case 'delta'
+    result = value;
   case 'triangle'
     result = randTriangle(range_low, range_high, value);
   case 'box'

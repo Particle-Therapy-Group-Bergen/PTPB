@@ -29,10 +29,10 @@ function result = sampleOED(nsamples, filename, organs, models, options)
 %      'struct_output' - Boolean value to force output to be in a full structure even if only dealing
 %                         with one organ or model. (default 0)
 %      'dosevolume_uncertainty_model' - Uncertainty distribution model to use for the dose volume
-%                         histogram data points. Possible values: 'delta', 'box', 'triangle',
+%                         histogram data points. Possible values: 'delta', 'box', 'box95', 'triangle',
 %                         'extrema' (default 'box')
 %      'parameter_uncertainty_model' - Uncertainty distribution model to use for the model parameters.
-%                         Possible values: 'delta', 'box', 'triangle', 'extrema', 'gaussian'
+%                         Possible values: 'delta', 'box', 'box95', 'triangle', 'extrema', 'gaussian'
 %                         (default 'box')
 %      'integration_method' - The integration method to use. Refer to "help OED" for a list of valid
 %                         options. (default 'trapz')
@@ -41,6 +41,23 @@ function result = sampleOED(nsamples, filename, organs, models, options)
 %                         valid values. (default 'linear')
 %      'dose_fractions' - The dose fraction value to use for the Competition models.
 %
+%Uncertainty models:
+% 'delta' - This models a delta function centered around the nominal parameter value. This model is
+%         useful to disentangle uncertainty contributions from the data points versus the different
+%         model parameters.
+% 'box' - A uniform distribution in the range [a..b] where a is the lower end and b the upper end of
+%         the nominal confidence interval.
+% 'box95' - A uniform distribution in the range [a-k..b+k] where a is the lower end and b the upper
+%         end of the 95% confidence interval. k is chosen such that 95% of the randomly generated
+%         samples fall within [a..b].
+% 'triangle' - A triangular distribution in the range [a..b] and maximum at c, where a is the lower
+%         end and b the upper end of the nominal confidence interval. c is chosen to equal the
+%         nominal value of the data point or parameter.
+% 'extrema' - Models a probability distribution with two delta functions, one at a and the other at
+%         b, where [a..b] forms the nominal confidence interval. This model is useful to sample only
+%         around the extrema of the uncertainty distribution.
+% 'gaussian' - A Gaussian distribution centered around the nominal parameter value and with a
+%         standard deviation of (b-a)/2, where [a..b] are the nominal confidence interval values.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -352,6 +369,9 @@ switch uncertainty_model
     result = randTriangle(range_low, range_high, value);
   case 'box'
     result = randBox(range_low, range_high);
+  case 'box95'
+    delta = abs(range_high - range_low) * (1 / 0.95 - 1) / 2;
+    result = randBox(range_low - delta, range_high + delta);
   case 'extrema'
     result = rand2state(range_low, range_high);
   case 'gaussian'

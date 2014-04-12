@@ -144,6 +144,24 @@ for n = 1:length(organs)
     warning('Found dose data points that are outside the valid range for organ "%s".', organ_name);
   end
 
+  % Make sure the distribution starts from dose = 0.
+  if organs{n}.dose(1) ~= 0
+    warning('Had to add dose = 0 data point (organ = %s)', organ_name);
+    organs{n}.dose = [0, organs{n}.dose];
+    organs{n}.ratioToTotalVolume = [1, organs{n}.ratioToTotalVolume];
+  end
+  % Make sure the distribution starts from volume ratio = 1 and ends with volume ratio = 0
+  if organs{n}.ratioToTotalVolume(1) ~= 1
+    warning('Had to change the first volume ratio data point from %g to 1 (organ = %s).', organs{n}.ratioToTotalVolume(1), organ_name);
+    organs{n}.ratioToTotalVolume(1) = 1;
+  end
+  if organs{n}.ratioToTotalVolume(length(organs{n}.ratioToTotalVolume)) ~= 0
+    warning('Had to add volume ratio = 0 data point (organ = %s)', organ_name);
+    pos = length(organs{n}.dose);
+    organs{n}.dose(pos+1) = organs{n}.dose(pos) + 2*params.dose_binning_uncertainty;
+    organs{n}.ratioToTotalVolume(pos+1) = 0;
+  end
+
   result.(organ_name).datapoints = [organs{n}.dose; organs{n}.ratioToTotalVolume];
 
   % Calculate uncertainty ranges for the data points.

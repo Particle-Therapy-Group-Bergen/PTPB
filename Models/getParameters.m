@@ -68,6 +68,7 @@ plateau_threshold = {
     {'Bladder',      4.5,  -0.5,    0.5},
     {'Thyroid',      4.5,  -0.5,    0.5},
     {'Prostate',     4.5,  -0.5,    0.5},
+    {'Breast',       4.5,  -0.5,    0.5},
   };
 
 % Linear-exponential model alpha parameters per organ:
@@ -88,7 +89,9 @@ linexp_alphas = {
     {'Bladder',    1.592,   -0.356,   0.434},
     {'Thyroid',    0.033,   -0.013,   0.014},
     {'Prostate',   0.804,   -0.496,   0.622},
+    {'Breast',     0.041,   -0.041,   0.041},
   };
+%breast parameters taken from Schneider 2011, no CI available
 
 % Competition model alpha and alpha/beta ratio parameters per organ:
 competition_params = {

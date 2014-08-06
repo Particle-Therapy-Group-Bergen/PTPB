@@ -165,6 +165,10 @@ if length(organs) > 0
   for m = 1:length(reforgan.dose)
     fprintf(file, '%25.16e', reforgan.dose(m));
     for n = 1:length(organs)
+      if reforgan.dose(m) ~= organs{n}.dose(m)
+        unlink('$DATA_FILE');
+        error('Attempting to plot DVHs with different binning. Plotting input files and/or organs with different binning is not supported.')
+      end
       fprintf(file, '%25.16e', organs{n}.ratioToTotalVolume(m));
     end
     fprintf(file, '\n');

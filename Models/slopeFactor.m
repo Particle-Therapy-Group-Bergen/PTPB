@@ -72,6 +72,7 @@ return;
 function [beta, gamma, eta, tau, c1, c2, c3, c4, k1, k2] = selectParams(cancerSite, gender)
 
 % Update data table as needed:
+% BEIR VII: Table 12-2 Committee's preferred ERR and EAR models for estimating site-specific solid cancer incidence and mortality
 %                                            beta_M  beta_F  gamma   eta  tau  c1    c2  c3  c4  k1    k2
 table = struct('BEIR_ERR_Stomach',          [0.21    0.48    -0.3   -1.4  30   1/10  -3  0   0   1/60  0  ],
                'BEIR_ERR_Colon',            [0.63    0.43    -0.3   -1.4  30   1/10  -3  0   0   1/60  0  ],

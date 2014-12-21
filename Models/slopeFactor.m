@@ -72,7 +72,8 @@ return;
 function [beta, gamma, eta, tau, c1, c2, c3, c4, k1, k2] = selectParams(cancerSite, gender)
 
 % Update data table as needed:
-% BEIR VII: Table 12-2 Committee's preferred ERR and EAR models for estimating site-specific solid cancer incidence and mortality
+% BEIR VII: Table 12-2 Committee's preferred ERR and EAR models for estimating site-specific solid cancer incidence and
+% mortality. Some parameters estimated by Gonzales et al using RadRAT.
 %                                            beta_M  beta_F  gamma   eta  tau  c1    c2  c3  c4  k1    k2
 table = struct('BEIR_ERR_Stomach',          [0.21    0.48    -0.3   -1.4  30   1/10  -3  0   0   1/60  0  ],
                'BEIR_ERR_Colon',            [0.63    0.43    -0.3   -1.4  30   1/10  -3  0   0   1/60  0  ],
@@ -84,18 +85,20 @@ table = struct('BEIR_ERR_Stomach',          [0.21    0.48    -0.3   -1.4  30   1
                'BEIR_ERR_Ovary',            [0       0.38    -0.3   -1.4  30   1/10  -3  0   0   1/60  0  ],
                'BEIR_ERR_Bladder',          [0.50    1.65    -0.3   -1.4  30   1/10  -3  0   0   1/60  0  ],
                'BEIR_ERR_Thyroid',          [0.53    1.05    -0.83   0     0   1      0  1   0   1/60  0  ],
+               'RadRAT_ERR_Rectum',         [0.12    0.12    -0.3   -1.4  30   1/10  -3  0   0   1/60  0  ],
                'BEIR_ERR_OtherSolidCancer', [0.27    0.45    -0.3   -2.8  30   1/10  -3  0   0   1/60  0  ],
 
                'BEIR_EAR_Stomach',          [4.9     4.9     -0.41   2.8  30   1/10  -3  0   0   1/60  0  ],
-               'BEIR_EAR_Colon',            [3.2     0.43    -0.41   2.8  30   1/10  -3  0   0   1/60  0  ],
-               'BEIR_EAR_Liver',            [2.2     0.32    -0.41   4.1  30   1/10  -3  0   0   1/60  0  ],
-               'BEIR_EAR_Lung',             [2.3     1.4     -0.41   5.2  30   1/10  -3  0   0   1/60  0  ],
-               'BEIR_EAR_Breast',           [0       0.51    -0.51   3.5   0   1      0  1   0   1/60  0  ],
+               'BEIR_EAR_Colon',            [3.2     1.6     -0.41   2.8  30   1/10  -3  0   0   1/60  0  ],
+               'BEIR_EAR_Liver',            [2.2     1.0     -0.41   4.1  30   1/10  -3  0   0   1/60  0  ],
+               'BEIR_EAR_Lung',             [2.3     3.4     -0.41   5.2  30   1/10  -3  0   0   1/60  0  ],
+               'BEIR_EAR_Breast',           [0       9.4     -0.51   3.5   0   1      0  1   0   1/60  0  ],
                'BEIR_EAR_Prostate',         [0.11    0       -0.41   2.8  30   1/10  -3  0   0   1/60  0  ],
-               'BEIR_EAR_Uterus',           [0       0.055   -0.41   2.8  30   1/10  -3  0   0   1/60  0  ],
-               'BEIR_EAR_Ovary',            [0       0.38    -0.41   2.8  30   1/10  -3  0   0   1/60  0  ],
-               'BEIR_EAR_Bladder',          [1.20    1.65    -0.41   6.0  30   1/10  -3  0   0   1/60  0  ],
+               'BEIR_EAR_Uterus',           [0       1.2     -0.41   2.8  30   1/10  -3  0   0   1/60  0  ],
+               'BEIR_EAR_Ovary',            [0       0.7     -0.41   2.8  30   1/10  -3  0   0   1/60  0  ],
+               'BEIR_EAR_Bladder',          [1.2     0.75    -0.41   6.0  30   1/10  -3  0   0   1/60  0  ],
                'BEIR_EAR_Thyroid',          [0       0        0      0     0   0      0  0   0    0    0  ],
+               'RadRAT_Rectum',             [0.34    0.34    -0.41   2.8  30   1/10  -3  0   0   1/60  0  ],
                'BEIR_EAR_OtherSolidCancer', [6.2     4.8     -0.41   2.8  30   1/10  -3  0   0   1/60  0  ]); 
 
 if ~ isfield(table, cancerSite)

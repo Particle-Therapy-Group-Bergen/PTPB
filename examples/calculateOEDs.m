@@ -55,6 +55,8 @@ organnames = {
                 'BODY',               'Body',
                 'Cribriform plate',   'CribriformPlate',
                 'CribiformPlate',     'CribriformPlate',
+                'Rectum_P_MT',        'Colon',
+                'Bladder_P',          'Bladder',
   };
 
 % The following table maps different parameters to use for different model calculations.
@@ -63,13 +65,13 @@ organnames = {
 %            organ used in      parameter for    parameter                                         integrations
 %            the DVH files.     PlateauHall.     for LinExp.  alpha1  beta1       alpha2  beta2       (n)
 organtable = {
-              {'Stomach',            4,           0.149,      0,      0,          0,      0,         1},
-              {'Colon',              4,           0.24,       0,      0,          0,      0,         1},
-              {'Liver',              4,           0.487,      0,      0,          0,      0,         1},
-              {'Lungs',              4,           0.129,      0.017,  0.017/4.5,  0.25,   0.25/4.5,  1},
-              {'Bladder',            4,           1.592,      0,      0,          0,      0,         1},
-              {'Thyroid',            4,           0.033,      0,      0,          0,      0,         1},
-              {'Prostate',           4,           0.804,      0,      0,          0,      0,         1},
+              {'Stomach',          4.5,           0.149,      0,      0,          0,      0,         1},
+              {'Colon',            4.5,           0.24,       0.017,  0.017/5.4,  0.25,   0.25/5.4,  1},
+              {'Liver',            4.5,           0.487,      0,      0,          0,      0,         1},
+              {'Lungs',            4.5,           0.129,      0.017,  0.017/4.5,  0.25,   0.25/4.5,  1},
+              {'Bladder',          4.5,           1.592,      0.006,  0.006/7.5,  0.25,   0.25/7.5,  1},
+              {'Thyroid',          4.5,           0.033,      0,      0,          0,      0,         1},
+              {'Prostate',         4.5,           0.804,      0,      0,          0,      0,         1},
   };
 
 

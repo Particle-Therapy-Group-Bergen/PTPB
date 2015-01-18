@@ -97,7 +97,9 @@ linexp_alphas = {
 competition_params = {
 %                            Uncertainty              Uncertainty   alpha/beta   Uncertainty
 %    Organ name   alpha1    Low     High   alpha2    Low     High     ratio      Low    High
+    {'Colon',     0.017,  -0.001,  0.001,   0.25,   -0.01,   0.01,     5.4,     -0.1,   0.1},
     {'Lungs',     0.017,  -0.001,  0.001,   0.25,   -0.01,   0.01,     4.5,     -0.1,   0.1},
+    {'Bladder',   0.006,  -0.001,  0.001,   0.25,   -0.01,   0.01,     7.5,     -0.1,   0.1},
   };
 
 

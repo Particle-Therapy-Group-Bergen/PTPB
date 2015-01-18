@@ -1,14 +1,14 @@
 function result = convertEQD(dvh, n, alpha_beta, T)
 %result = convertEQD(dvh, n, alpha_beta [, T])
 %
-%Converts the DVH histogram's dose bins to the isoeffective dose.
-%The following equations is applied to each bin i:
+% Converts the DVH histogram's dose bins to the isoeffective dose.
+% The following equations is applied to each bin i:
 %
 %               D_i/n + alpha/beta
 %  EQD_i = D_i --------------------
 %                 T + alpha/beta
 %
-%Parameters:
+% Parameters:
 %  dvh - The DVH structure as returned by getDoseVolumeHistogram(). Note that it
 %        will normally return a structure for all the organs. Thus one needs to
 %        select which organ to actually use. For example, if we have a input
@@ -62,10 +62,10 @@ datapoints = [EQD(dvh.datapoints(:,1), n, alpha_beta, T), dvh.datapoints(:,2)];
 range_low = [EQD(dvh.range_low(:,1), n, alpha_beta, T), dvh.range_low(:,2)];
 range_high = [EQD(dvh.range_high(:,1), n, alpha_beta, T), dvh.range_high(:,2)];
 result = struct('datapoints', datapoints, 'range_low', range_low, 'range_high', range_high);
-return
+return;
 
 
 function result = EQD(D, n, alpha_beta, T)
 % Apply EQD calculation.
 result = D.* ((D./n + alpha_beta) ./ (T + alpha_beta));
-return
+return;

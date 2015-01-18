@@ -2,7 +2,7 @@ function y = combsrep(v, k)
 %COMBSREP Combinations with replacement.
 %
 % COMBSREP(V, K) where V is a vector of length N, produces a matrix with
-% (N+1-1)!/K!(N-1)! (i.e., "N+K-1 choose K") rows and K columns. Each row of
+% (N+K-1)!/K!(N-1)! (i.e., "N+K-1 choose K") rows and K columns. Each row of
 % the result has K of the elements in the vector V. The vector V may be a
 % vector of any class. If the input is sparse, the output will be sparse.
 %

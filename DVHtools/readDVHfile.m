@@ -205,10 +205,11 @@ end
 
 % Check that we parsed all relevant information for the header.
 % If not then warn the user.
-if length(patientName) == 0 || length(patientId) == 0 || length(progDate) == 0 \
-        || length(progType) == 0 || (length(plan) == 0 && length(plansum) == 0) \
-        || prescribedDose == nan || length(prescribedDoseUnit) == 0 \
-        || percentForDose == nan || length(percentForDoseUnit) == 0
+missing = length(patientName) == 0 || length(patientId) == 0 || length(progDate) == 0;
+missing = missing || length(progType) == 0 || (length(plan) == 0 && length(plansum) == 0);
+missing = missing || prescribedDose == nan || length(prescribedDoseUnit) == 0
+missing = missing || percentForDose == nan || length(percentForDoseUnit) == 0
+if missing
     warning('Could not find all the relevant DVH header fields. Current line %d.', n);
 end
 
@@ -495,18 +496,19 @@ end
 
 % Check that we parsed all relevant information for the structure.
 % If not then warn the user.
-if length(structName) == 0 || length(approvalStatus) == 0 || length(plan) == 0 \
-        || length(course) == 0 || volume == nan || length(volumeUnit) == 0 \
-        || doseCoverage == nan || length(doseCoverageUnit) == 0 \
-        || samplingCoverage == nan || length(samplingCoverageUnit) == 0 \
-        || minDose == nan || length(minDoseUnit) == 0 \
-        || maxDose == nan || length(maxDoseUnit) == 0 \
-        || meanDose == nan || length(meanDoseUnit) == 0 \
-        || modalDose == nan || length(modalDoseUnit) == 0 \
-        || medianDose == nan || length(medianDoseUnit) == 0 \
-        || standardDeviation == nan || length(standardDeviationUnit) == 0 \
-        || (length(doseUnit) == 0 && length(relativeDoseUnit) == 0) \
-        || (length(structureVolumeUnit) == 0 && length(ratioToTotalVolumeUnit) == 0)
+missing = length(structName) == 0 || length(approvalStatus) == 0 || length(plan) == 0
+missing = missing || length(course) == 0 || volume == nan || length(volumeUnit) == 0
+missing = missing || doseCoverage == nan || length(doseCoverageUnit) == 0
+missing = missing || samplingCoverage == nan || length(samplingCoverageUnit) == 0
+missing = missing || minDose == nan || length(minDoseUnit) == 0
+missing = missing || maxDose == nan || length(maxDoseUnit) == 0
+missing = missing || meanDose == nan || length(meanDoseUnit) == 0
+missing = missing || modalDose == nan || length(modalDoseUnit) == 0
+missing = missing || medianDose == nan || length(medianDoseUnit) == 0
+missing = missing || standardDeviation == nan || length(standardDeviationUnit) == 0
+missing = missing || (length(doseUnit) == 0 && length(relativeDoseUnit) == 0)
+missing = missing || (length(structureVolumeUnit) == 0 && length(ratioToTotalVolumeUnit) == 0)
+if missing
     warning('Could not find all the relevant fields for a DVH structure. Current line %d.', n);
 end
 

@@ -17,29 +17,29 @@ function y = combsrep(v, k)
 error(nargchk(2, 2, nargin));
 
 if sum(size(v) > 1) > 1
-    error('First argument must be a vector.');
+  error('First argument must be a vector.');
 end
 
 if any(size(k) ~= 1) | (k ~= round(k)) | (k < 0)
-    error('Second argument must be a scalar.');
+  error('Second argument must be a scalar.');
 end
 
 if k == 0
-    y = zeros(0, k);
+  y = zeros(0, k);
 elseif k == 1
-    y = v;
+  y = v;
 else
-    v = v(:);
-    y = [];
-    m = length(v);
-    if m == 1
-        y = v(1, ones(k, 1));
-    else
-        for i = 1 : m
-        y_recr = combsrep(v(i:end), k-1);
-        s_repl = v(i);
-        s_repl = s_repl(ones(size(y_recr, 1), 1), 1);
-        y = [ y ; s_repl, y_recr ];
-        end
+  v = v(:);
+  y = [];
+  m = length(v);
+  if m == 1
+    y = v(1, ones(k, 1));
+  else
+    for i = 1 : m
+    y_recr = combsrep(v(i:end), k-1);
+    s_repl = v(i);
+    s_repl = s_repl(ones(size(y_recr, 1), 1), 1);
+    y = [ y ; s_repl, y_recr ];
     end
+  end
 end

@@ -91,6 +91,8 @@ switch responseModel
         integrand = @(x) LinExp(x, doseCumulative, interpMethod, integrandParams{:});
     case 'Competition'
         integrand = @(x) Competition(x, doseCumulative, interpMethod, integrandParams{:});
+    case 'LinPlat'
+        integrand = @(x) LinPlat(x, doseCumulative, interpMethod, integrandParams{:});
     otherwise
         error('Unknown response model type "%s".', responseModel);
 end
@@ -144,7 +146,7 @@ return;
 function y = PlateauHall(x, doseCumulative, interpMethod, threshold)
 % Check for optional threshold parameter, otherwise set it to 4 Gy.
 if ~ exist('threshold')
-    threshold = 4;
+    threshold = 4.5;
 end
 d = doseInterpolate(x, doseCumulative, interpMethod);
 y = d .* (d < threshold) + threshold .* (d >= threshold);
@@ -161,4 +163,10 @@ function y = Competition(x, doseCumulative, interpMethod, alpha1, beta1, alpha2,
 % n is the number of dose fractions.
 d = doseInterpolate(x, doseCumulative, interpMethod);
 y = (d + beta1./alpha1.*d.^2./n).*exp(-(alpha2.*d + beta2.*d.^2./n));
+return;
+
+
+function y = LinPlat(x, doseCumulative, interpMethod, delta)
+d = doseInterpolate(x, doseCumulative, interpMethod);
+y = ((1-exp(-delta.*d))./delta);
 return;

@@ -20,7 +20,7 @@ if sum(size(v) > 1) > 1
   error('First argument must be a vector.');
 end
 
-if any(size(k) ~= 1) | (k ~= round(k)) | (k < 0)
+if any(size(k) ~= 1) || (k ~= round(k)) || (k < 0)
   error('Second argument must be a scalar.');
 end
 

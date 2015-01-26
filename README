@@ -14,6 +14,10 @@ Models/
     These include Organ Equivalent Dose (OED) calculations and slope factor
     calculations.
 
+src/
+    Contains code and scripts implementing various general functions for the
+    calculation framework.
+
 examples/
     Here you will find some example scripts that should how to use the different
     functions and tools implemented in this code module.

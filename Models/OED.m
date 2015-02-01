@@ -5,7 +5,7 @@ function dose = OED(responseModel, doseCumulative, varargin)
 % Calculates the Organ Equivalent Dose (OED) from the cumulative dose distribution data points.
 %
 %Where,
-% responseModel can be either 'LNT', 'PlateauHall', 'LinExp' or 'Competition'.
+% responseModel can be either 'LNT', 'PlateauHall', 'LinExp', 'Competition' or 'LinPlat'.
 %
 % doseCumulative are the cumulative dose distribution data points as a function of dose (dose on x-axis).
 %

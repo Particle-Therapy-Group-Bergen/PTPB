@@ -13,7 +13,7 @@ function dose = OED(responseModel, doseCumulative, varargin)
 % It should be created with the struct() function as follows (with default values indicated):
 %   options = struct('integration_method', 'quadv', 'tolerance', 1e-6, 'interpolation_method', 'pchip');
 % The option definitions are:
-%   'integration_method' - The integration method to use, can be one of 'quad', 'quadv', 'quadl', quadgk' or 'trapz'.
+%   'integration_method' - The integration method to use, can be one of 'quad', 'quadv', 'quadl', 'quadgk' or 'trapz'.
 %   'tolerance' - The error tolerance parameter to use for the integration.
 %   'interpolation_method' - The interpolation method to use for doseInterpolate.
 %

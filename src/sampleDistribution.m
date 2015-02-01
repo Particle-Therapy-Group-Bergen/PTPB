@@ -45,7 +45,7 @@ function result = sampleDistribution(distribution, N, varargin)
 % N is the number of samples to produce.
 %
 % All additional parameters are used to define the shape of the distribution
-% being sampled.
+% being sampled. These can be vectors, as long as they are the same length.
 
 if nargin == 0
     % Print help message if no arguments are given.
@@ -146,42 +146,42 @@ switch distribution
         if nargin < 4
             error('Require at least two distribution parameters.')
         end
-        mu = varargin{1};
-        sigma = varargin{2};
-        result = randn(N, 1) .* sigma + mu;
+        mu = repmat(varargin{1}, N, 1);
+        sigma = repmat(varargin{2}, N, 1);
+        result = randn(size(mu)) .* sigma + mu;
     case 'gaus95'
         if nargin < 4
             error('Require at least two distribution parameters.')
         end
-        l = varargin{1};
-        u = varargin{2};
+        l = repmat(varargin{1}, N, 1);
+        u = repmat(varargin{2}, N, 1);
         Cl = 0.025;
         Cu = 0.975;
-        k1 = sqrt(2)*erfinv(2*Cl - 1);
-        k2 = sqrt(2)*erfinv(2*Cu - 1);
-        mu = (k2*l - k1*u) / (k2 - k1);
+        k1 = sqrt(2).*erfinv(2.*Cl - 1);
+        k2 = sqrt(2).*erfinv(2.*Cu - 1);
+        mu = (k2.*l - k1.*u) ./ (k2 - k1);
         sigma = (l-mu) / k1;
-        result = randn(N, 1) .* sigma + mu;
+        result = randn(size(mu)) .* sigma + mu;
     case 'lognorm'
         if nargin < 4
             error('Require at least two distribution parameters.')
         end
-        mu = varargin{1};
-        sigma = varargin{2};
-        result = exp(randn(N, 1) .* sigma + mu);
+        mu = repmat(varargin{1}, N, 1);
+        sigma = repmat(varargin{2}, N, 1);
+        result = exp(randn(size(mu)) .* sigma + mu);
     case 'lognorm95'
         if nargin < 4
             error('Require at least two distribution parameters.')
         end
-        l = varargin{1};
-        u = varargin{2};
+        l = repmat(varargin{1}, N, 1);
+        u = repmat(varargin{2}, N, 1);
         Cl = 0.025;
         Cu = 0.975;
-        k1 = sqrt(2)*erfinv(2*Cl - 1);
-        k2 = sqrt(2)*erfinv(2*Cu - 1);
-        mu = (k2*log(l) - k1*log(u)) / (k2 - k1);
+        k1 = sqrt(2).*erfinv(2.*Cl - 1);
+        k2 = sqrt(2).*erfinv(2.*Cu - 1);
+        mu = (k2.*log(l) - k1.*log(u)) ./ (k2 - k1);
         sigma = (log(l)-mu) / k1;
-        result = exp(randn(N, 1) .* sigma + mu);
+        result = exp(randn(size(mu)) .* sigma + mu);
     otherwise
         error('Distribution type "%s" is not supported.', distribution);
 end

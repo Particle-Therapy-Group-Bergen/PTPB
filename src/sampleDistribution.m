@@ -7,7 +7,9 @@ function result = sampleDistribution(distribution, N, varargin)
 %result = sampleDistribution('triangle', N, min, mode, max)
 %result = sampleDistribution('triangle95', N, lower, mean, upper)
 %result = sampleDistribution('gaus', N, mu, sigma)
+%result = sampleDistribution('gaus95', N, lower, upper)
 %result = sampleDistribution('lognorm', N, mu, sigma)
+%result = sampleDistribution('lognorm95', N, lower, upper)
 %
 % Randomly samples a distribution.
 %

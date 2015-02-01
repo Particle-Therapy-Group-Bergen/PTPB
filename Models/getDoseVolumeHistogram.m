@@ -1,6 +1,7 @@
 function result = getDoseVolumeHistogram(filename, varargin)
 %result = getDoseVolumeDistribution(filename, [organ, ...])
 %result = getDoseVolumeDistribution(filename, name_map, [organ, ...])
+%result = getDoseVolumeDistribution(filename, name_map, params, [organ, ...])
 %
 %Retrieve the dose volume histograms for a given set of organs from the
 %converted DVH data file. The file should be a .mat file converted with
@@ -17,6 +18,10 @@ function result = getDoseVolumeHistogram(filename, varargin)
 %            organ structures in the file to standard values. The first column
 %            of the cell array is treated as the key (the names in the file) and
 %            the second column as the values (the standard names to map to).
+% params - Optional uncertainty parameters provided as a structure with the
+%          following two fields:
+%            dose_binning_uncertainty - uncertainty in the dose.
+%            volume_ratio_uncertainty - uncertainty in the volume ratio.
 % organ - One or more optional organ names can be passed to indicate specific
 %         structures to load from the file. If no organs are explicitly given
 %         then all are loaded and returned.
@@ -27,7 +32,7 @@ function result = getDoseVolumeHistogram(filename, varargin)
 %    Particle Therapy Project Bergen (PTPB) - tools and models for research in
 %    cancer therapy using particle beams.
 %
-%    Copyright (C) 2014 Particle Therapy Group Bergen
+%    Copyright (C) 2014-2015 Particle Therapy Group Bergen
 %
 %    This program is free software: you can redistribute it and/or modify
 %    it under the terms of the GNU General Public License as published by
@@ -46,11 +51,20 @@ function result = getDoseVolumeHistogram(filename, varargin)
 
 % Authors: Artur Szostak <artursz@iafrica.com>
 
-% Get the organ name map if it was given in the list of arguments.
-if length(varargin) > 0 && iscell(varargin{1})
+% Get the organ name map and uncertainty parameters if it was given in the list
+% of arguments.
+if length(varargin) > 1 && iscell(varargin{1}) && isstruct(varargin{2})
+  poffset = 2;
+  organ_name_map = varargin{1};
+  if length(organ_name_map) ~= 0 && size(organ_name_map, 2) ~= 2
+    error('The name_map parameter must be a Nx2 cell matrix.');
+  end
+  params = varargin{2};
+  search_names = varargin(3:length(varargin));
+elseif length(varargin) > 0 && iscell(varargin{1})
   poffset = 1;
   organ_name_map = varargin{1};
-  if size(organ_name_map, 2) ~= 2
+  if length(organ_name_map) ~= 0 && size(organ_name_map, 2) ~= 2
     error('The name_map parameter must be a Nx2 cell matrix.');
   end
   search_names = varargin(2:length(varargin));
@@ -74,7 +88,9 @@ if ~ exist('filename')
 end
 data = load(filename, 'DVH_data');
 
-params = getParameters('histogram_uncertainty');
+if ~ exist('params')
+    params = getParameters('histogram_uncertainty');
+end
 
 % Extract the dose volume histograms:
 result = struct;
@@ -84,7 +100,7 @@ for n = 1:length(organs)
   extra_error = 0;
 
   % Try map the name to a standard one if we have a mapping structure.
-  if exist('organ_name_map')
+  if exist('organ_name_map') && length(organ_name_map) > 0
     pos = strmatch(organ_name, {organ_name_map{:,1}}, 'exact');
     if length(pos) > 0
       organ_name = organ_name_map{pos(1),2};

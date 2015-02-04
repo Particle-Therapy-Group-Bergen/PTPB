@@ -18,6 +18,7 @@ function result = sampleOEDFromFile(nsamples, filename, organs, models, options)
 %          'LinExp' - Linear-exponential model.
 %          'Competition' - Competition model (extension of LinExp) with only alpha and alpha/beta
 %                         ratio parameters specified.
+%          'LinPlat' - Plateau model with a smooth transition from the Linear regime.
 % options - A structure containing various parameters to control the calculation.
 %   The valid field names of this structure are:
 %      'organ_name_map' - A Nx2 cell matrix of key-value pairs to map organ names found in
@@ -235,6 +236,15 @@ for k = 1:length(names)
           mp_range_low = [mp.competition_alpha1.range_low, mp.competition_alpha2.range_low, mp.competition_alpha_beta_ratio.range_low];
           mp_range_high = [mp.competition_alpha1.range_high, mp.competition_alpha2.range_high, mp.competition_alpha_beta_ratio.range_high];
           mp_constants = [dose_fractions];
+        else
+          continue;
+        end
+      case 'LinPlat'
+        if isfield(mp, 'linplat_delta')
+          mp_values = [mp.linplat_delta.value];
+          mp_range_low = [mp.linplat_delta.range_low];
+          mp_range_high = [mp.linplat_delta.range_high];
+          mp_constants = [];
         else
           continue;
         end

@@ -72,8 +72,8 @@ The available options are:
         Gives the name of a response model to use for the OED calculation. More
         than one model can be given. If no models are explicitly passed on the
         command line then the script tries to compute all possible models.
-        The list of valid models includes: 'LNT', 'PlateauHall', 'LinExp' or
-        'Competition'.
+        The list of valid models includes: 'LNT', 'PlateauHall', 'LinExp',
+        'Competition' or 'LinPlat'.
 
     --samples=<number> | -n=<number>
         Indicates the number of samples to calculate.

@@ -18,6 +18,9 @@ src/
     Contains code and scripts implementing various general functions for the
     calculation framework.
 
+scripts/
+    Contains helper scripts to be used on the command line.
+
 examples/
     Here you will find some example scripts that should how to use the different
     functions and tools implemented in this code module.

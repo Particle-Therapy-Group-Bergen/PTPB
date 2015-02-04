@@ -42,7 +42,8 @@ if nargin == 0
       'histogram_uncertainty',
       'plateau_threshold',
       'linexp_alphas',
-      'competition_params'
+      'competition_params',
+      'linplat_deltas'
     };
 else
   names = varargin;
@@ -102,6 +103,13 @@ competition_params = {
     {'Bladder',   0.006,  -0.001,  0.001,   0.25,   -0.01,   0.01,     7.5,     -0.1,   0.1},
   };
 
+% Linear-plateau delta parameters per organ:
+linplat_deltas = {
+%                              Uncertainty
+%    Organ name    Value     Low       High
+    {'Bladder',     0.1,    -0.01,     0.01},
+  };
+
 
 result = struct;
 for n = 1:length(names)
@@ -129,6 +137,11 @@ for n = 1:length(names)
         result.(p{1}).competition_alpha1 = struct('value', p{2}, 'range_low', p{2}+p{3}, 'range_high', p{2}+p{4});
         result.(p{1}).competition_alpha2 = struct('value', p{5}, 'range_low', p{5}+p{6}, 'range_high', p{5}+p{7});
         result.(p{1}).competition_alpha_beta_ratio = struct('value', p{8}, 'range_low', p{8}+p{9}, 'range_high', p{8}+p{10});
+      end
+    case 'linplat_deltas'
+      for k = 1:length(linplat_deltas)
+        p = linplat_deltas{k};
+        result.(p{1}).linplat_delta = struct('value', p{2}, 'range_low', p{2}+p{3}, 'range_high', p{2}+p{4});
       end
     otherwise
       error('Unknown parameter set name %s.', name);

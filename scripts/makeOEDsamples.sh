@@ -138,7 +138,7 @@ options.integration_method = '$INTEGRATION_METHOD';
 options.integration_tolerance = $INTEGRATION_TOLERANCE;
 options.interpolation_method = '$INTERPOLATION_METHOD';
 options.dose_fractions = $DOSE_FRACTIONS;
-OED_samples = sampleOED($NSAMPLES, '$INFILE', {$ORGANS}, {$MODELS}, options);
+OED_samples = sampleOEDFromFile($NSAMPLES, '$INFILE', {$ORGANS}, {$MODELS}, options);
 save('-7', '$OUTFILE', 'OED_samples');
 EOF
 }

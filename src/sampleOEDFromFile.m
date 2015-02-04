@@ -1,5 +1,5 @@
-function result = sampleOED(nsamples, filename, organs, models, options)
-%result = sampleOED(nsamples, filename, organs, models, options)
+function result = sampleOEDFromFile(nsamples, filename, organs, models, options)
+%result = sampleOEDFromFile(nsamples, filename, organs, models, options)
 %
 %Samples the uncertainty distributions of the dose volume histograms and model parameters
 %and calculates organ equivalent doses (OEDs) for these sampled values.

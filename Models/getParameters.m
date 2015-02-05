@@ -107,7 +107,9 @@ competition_params = {
 linplat_deltas = {
 %                              Uncertainty
 %    Organ name    Value     Low       High
-    {'Bladder',     0.1,    -0.01,     0.01},
+    {'Bladder',     5.10,   -0.01,     0.01},
+    {'Colon',       0.26,   -0.01,     0.01},
+    {'Rectum',      0.26,   -0.01,     0.01},
   };
 
 

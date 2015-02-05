@@ -1,5 +1,5 @@
-function result = calculateOEDupdated(filename, organ, integration_method, integration_tolerance)
-%function result = calculateOEDs(filename, organ, integration_method, integration_tolerance)
+function result = calcOEDmulti(filename, organ, integration_method, integration_tolerance)
+%function result = calcOEDmulti(filename, organ, integration_method, integration_tolerance)
 %
 % This script is an example for calculating OED values for different organs found
 % in a DVH file converted into a .mat workspace file. The converted file should contain
@@ -16,11 +16,11 @@ function result = calculateOEDupdated(filename, organ, integration_method, integ
 %
 % Example usage to calculate for all organs using 'trapz' method and 1e-4 tollerance:
 %
-%  x = calculateOEDs('data.mat', {}, 'trapz', 1e-4);
+%  x = calcOEDmulti('data.mat', {}, 'trapz', 1e-4);
 %
 % or just for lungs:
 %
-%  x = calculateOEDs('data.mat', 'Lungs', 'trapz', 1e-4);
+%  x = calcOEDmulti('data.mat', 'Lungs', 'trapz', 1e-4);
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -28,7 +28,7 @@ function result = calculateOEDupdated(filename, organ, integration_method, integ
 %    Particle Therapy Project Bergen (PTPB) - tools and models for research in
 %    cancer therapy using particle beams.
 %
-%    Copyright (C) 2014 Particle Therapy Group Bergen
+%    Copyright (C) 2014-2015 Particle Therapy Group Bergen
 %
 %    This program is free software: you can redistribute it and/or modify
 %    it under the terms of the GNU General Public License as published by

@@ -74,7 +74,7 @@ fields{1} = 'dose_binning_uncertainty_model';
 fields{2} = 'dose_binning_uncertainty';
 fields{3} = 'volume_ratio_uncertainty_model';
 fields{4} = 'volume_ratio_uncertainty';
-fields{5} = 'integrations_methods';
+fields{5} = 'integration_methods';
 fields{6} = 'interpolation_methods';
 fields{7} = 'organs';
 for n = 1:length(fields)
@@ -83,7 +83,7 @@ for n = 1:length(fields)
     end
 end
 
-integrationMethods = params.integrations_methods;
+integrationMethods = params.integration_methods;
 interpolationMethods = params.interpolation_methods;
 
 result = {};
@@ -168,7 +168,7 @@ params = struct('dose_binning_uncertainty_model', 'box',
                 'dose_binning_uncertainty', p.dose_binning_uncertainty,
                 'volume_ratio_uncertainty_model', 'box',
                 'volume_ratio_uncertainty', p.volume_ratio_uncertainty,
-                'integrations_methods', {integrationMethods},
+                'integration_methods', {integrationMethods},
                 'interpolation_methods', {interpolationMethods},
                 'organs', organParams);
 return;

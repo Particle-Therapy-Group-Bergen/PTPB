@@ -98,7 +98,7 @@ if length(xp) < 2
     return;
 end
 
-% Handle another special case where does is likely zero.
+% Handle another special case where dose is likely zero.
 if length(xp) == 2 && xp(1) == 1 && xp(2) == 0 && yp(1) == 0 && yp(2) >= 0
     y = zeros(size(x));
     return;

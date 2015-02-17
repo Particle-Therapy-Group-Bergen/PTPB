@@ -50,14 +50,26 @@ function result = calcVolumeFractions(filename, organ, intervals, interpolation_
 if ~ exist('filename')
     error('No DVH filename given.');
 end
+if ~ ischar(filename)
+    error('The filename must be a string.')
+end
 if ~ exist('organ')
     error('No organ name given.');
+end
+if ~ ischar(organ)
+    error('The organ name must be a string.')
 end
 if ~ exist('intervals')
     intervals = [0, 0.5, 1, 10,  13, 100];
 end
+if ~ isvector(intervals) || length(intervals) < 2
+    error('The intervals argument must be a vector of at least 2 elements to define a range.');
+end
 if ~ exist('interpolation_method')
     interpolation_method = 'pchip';
+end
+if ~ ischar(interpolation_method)
+    error('The interpolation_method parameter must be a string.')
 end
 if ~ exist('organ_name_map')
     organ_name_map = {
@@ -68,21 +80,28 @@ if ~ exist('organ_name_map')
             'Bladder_P',          'Bladder';
         };
 end
+if ~ iscell(organ_name_map)
+    error('The organ_name_map parameter must be a cell array.')
+end
 
 dvh = getDoseVolumeHistogram(filename, organ_name_map, organ).(organ);
 x = intervals;
 y = InterpolateDVH(dvh, x, interpolation_method);
 N = length(y);
 volumeFractions = y(1:N-1) - y(2:N);
-bar(volumeFractions * 100);
-title(sprintf('Volume fractions in given dose range for %s', organ));
-xlabel('Dose ranges [Gy]');
-ranges = {};
-for n = 1:N-1
-    ranges{n} = sprintf('%g - %g', x(n), x(n+1));
+% Draw a bar graph only if there is more than one range.
+% Otherwise the bar() function fails when it gets a single scalar.
+if N > 2
+    bar(volumeFractions * 100);
+    title(sprintf('Volume fractions in given dose range for %s', organ));
+    xlabel('Dose ranges [Gy]');
+    ranges = {};
+    for n = 1:N-1
+        ranges{n} = sprintf('%g - %g', x(n), x(n+1));
+    end
+    set(gca, 'XTick', 1:N-1, 'XTickLabel', ranges);
+    ylabel('Volume fraction [%]');
 end
-set(gca, 'XTick', 1:N-1, 'XTickLabel', ranges);
-ylabel('Volume fraction [%]');
 result = volumeFractions;
 return;
 

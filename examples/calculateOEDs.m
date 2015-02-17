@@ -55,7 +55,7 @@ organnames = {
                 'BODY',               'Body',
                 'Cribriform plate',   'CribriformPlate',
                 'CribiformPlate',     'CribriformPlate',
-                'Rectum_P_MT',        'Colon',
+                'Rectum_P_MT',        'Rectum',
                 'Bladder_P',          'Bladder',
   };
 

@@ -31,7 +31,8 @@ PREFIX_DIR=~/bin
 endif
 
 MATLAB_FILES=$(shell find . -type f -name "*.m" | grep -v template)
-SCRIPT_FILES=$(shell find . -type f -name "*.sh") $(shell find . -type f -name "*.py")
+SCRIPT_FILES=$(shell find . -type f -name "*.sh") \
+             $(shell find . -type f -name "*.py" | grep -v models_config.py)
 
 all:
 

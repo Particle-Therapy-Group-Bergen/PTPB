@@ -1,5 +1,5 @@
-function result = processPatients(dvhfiles, params, organs, models, organ_name_map)
-%result = processPatients(dvhfiles [, params, organs, models, organ_name_map])
+function result = processPatients(dvhfiles, params, organs, models, organ_name_map, N)
+%result = processPatients(dvhfiles [, params, organs, models, organ_name_map, N])
 %
 % This is the top level entry point for performing standard model calculations
 % on one or more patient files. The output will be returned as a structure
@@ -19,6 +19,8 @@ function result = processPatients(dvhfiles, params, organs, models, organ_name_m
 % organ_name_map - The organ name remapping table passed to the function
 %                  getDoseVolumeHistogram. Refer to that function for details
 %                  about this parameters structure.
+%
+% N - The number of samples to produce.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -50,8 +52,6 @@ if nargin == 0
     return;
 end
 
-N = 2;
-
 if ~ exist('dvhfiles')
     error('No file names given for "dvhfiles" cell array.');
 end
@@ -66,6 +66,9 @@ if ~ exist('models') || length(models) == 0
 end
 if ~ exist('organ_name_map')
     organ_name_map = {};
+end
+if ~ exist('N')
+    N = 100;
 end
 
 % Check that we have the necessary fields in the params structure.
@@ -149,9 +152,7 @@ for n = 1:length(names)
         B = p.(name).plateau_threshold.range_high;
         model = struct('uncertainty_model', 'triangle',
                        'params', {{A, C, B}});
-        model2 = struct('uncertainty_model', 'triangle',
-                       'params', {{1,2,3}});
-        organParams.(name).PlateauHall = {model, model2};
+        organParams.(name).PlateauHall = {model};
     end
     if isfield(p.(name), 'linexp_alpha')
         A = p.(name).linexp_alpha.range_low;

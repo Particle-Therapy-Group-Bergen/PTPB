@@ -1,4 +1,4 @@
-# This is and example of an organ/model configuration file to use with the
+# This is an example of an organ/model configuration file to use with the
 # processPatients.py tool.
 
 # Optional list of organs. If no list of organs is given then all organs found

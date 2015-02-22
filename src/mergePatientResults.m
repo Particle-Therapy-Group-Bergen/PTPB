@@ -53,8 +53,12 @@ for n = 2:nargin
         if iscell(results2.(field))
             for m = 1:length(results2.(field))
                 k = findSamePatient(result.(field), results2.(field){m}.filename);
-                X = mergeOrganData(result.(field){k}, results2.(field){m});
-                result.(field){k} = X;
+                if k <= length(result.(field))
+                    X = mergeOrganData(result.(field){k}, results2.(field){m});
+                    result.(field){k} = X;
+                else
+                    result.(field){k} = results2.(field){m};
+                end
             end
         else
             result.(field);

@@ -89,10 +89,10 @@ end
 integrationMethods = params.integration_methods;
 interpolationMethods = params.interpolation_methods;
 
-result = {};
+result = struct;
 for n = 1:length(dvhfiles)
     filename = dvhfiles{n};
-    result{n} = struct('filename', filename);
+    result.OED_per_patient{n} = struct('filename', filename);
     dvhs = getDoseVolumeHistogram(filename, organ_name_map, params, organs{:});
     organ_names = fieldnames(dvhs);
     if length(organs) > 0
@@ -122,7 +122,7 @@ for n = 1:length(dvhfiles)
             end
             oeds = sampleOED(dvh, N, model, integrationMethods,
                              interpolationMethods, modelParams{:});
-            result{n}.organs.(organ).(model) = oeds;
+            result.OED_per_patient{n}.organs.(organ).(model) = oeds;
         end
     end
 end

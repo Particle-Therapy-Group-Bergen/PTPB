@@ -648,10 +648,15 @@ def run():
         script += "params = {};\n"
     else:
         script += params.generate_matlab_params()
-    # Add the function call.
-    script += "results = processPatients(dvhfiles, params, organs, models," \
+    # Add the function call to process the patient input files.
+    script += "Results = processPatients(dvhfiles, params, organs, models," \
               " organ_name_map, {0});".format(args.nsamples)
-    script += "save('-7', '{0}', 'results');".format(args.outputfile)
+    # Add the function calls to merge data if the output file already exists.
+    if os.path.exists(args.outputfile):
+        script += "Previous = load('{0}', 'Results').Results;".format(
+                                                                args.outputfile)
+        script += "Results = mergePatientResults(Previous, Results);"
+    script += "save('-7', '{0}', 'Results');".format(args.outputfile)
     # Invoke octave to execute the Matlab script.
     command_less_script = ['octave', '-q', '--path', '@@MFILE_PATH@@', '--eval']
     command = command_less_script + [script]

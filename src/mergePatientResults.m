@@ -55,7 +55,7 @@ for n = 2:nargin
                 k = findSamePatient(result.(field), results2.(field){m}.filename);
                 if k <= length(result.(field))
                     current = result.(field){k}.organs;
-                    X = mergeOrganData(current, results2.(field){m}.organs);
+                    X = mergeOrganData(current, results2.(field){m}.organs, 0);
                     result.(field){k}.organs = X;
                 else
                     result.(field){k} = results2.(field){m};
@@ -63,7 +63,7 @@ for n = 2:nargin
             end
         else
             if isfield(result, field)
-                result.(field) = mergeOrganData(result.(field), results2.(field));
+                result.(field) = mergeOrganData(result.(field), results2.(field), 1);
             else
                 result.(field) = results2.(field);
             end
@@ -87,7 +87,7 @@ k = length(data)+1;
 return;
 
 
-function y = mergeOrganData(a, b)
+function y = mergeOrganData(a, b, bycol)
 % Merge organ/model sample data from structures 'a' and 'b' into the result 'y'.
 y = a;
 organs = fieldnames(b);
@@ -97,8 +97,7 @@ for n = 1:length(organs)
     for m = 1:length(models)
         model = models{m};
         current = y.(organ).(model);
-        [nr, nc] = size(current);
-        if nc > nr
+        if bycol
             y.(organ).(model) = [current b.(organ).(model)];
         else
             y.(organ).(model) = [current; b.(organ).(model)];

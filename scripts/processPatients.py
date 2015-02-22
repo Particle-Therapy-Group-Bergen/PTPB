@@ -392,11 +392,14 @@ class ConfigParams(object):
 
     def __init__(self, integration_methods, interpolation_methods,
                  dose_binning_uncertainty, volume_ratio_uncertainty,
+                 bootstrap_max_samples, bootstrap_sample_mode,
                  organ_name_map, organ_params, organs, models):
         self.integration_methods = integration_methods
         self.interpolation_methods = interpolation_methods
         self.dose_binning_uncertainty = dose_binning_uncertainty
         self.volume_ratio_uncertainty = volume_ratio_uncertainty
+        self.bootstrap_max_samples = bootstrap_max_samples
+        self.bootstrap_sample_mode = bootstrap_sample_mode
         self.organ_name_map = organ_name_map
         self.organ_parameters = collections.defaultdict(dict)
         for organ in organ_params:
@@ -441,10 +444,13 @@ class ConfigParams(object):
                "interpolation_methods = {3}\n" \
                "dose_binning_uncertainty = {4}\n" \
                "volume_ratio_uncertainty = {5}\n" \
-               "organ_name_map = {6}\n{7}".format(
+               "bootstrap_max_samples = {6}\n" \
+               "bootstrap_sample_mode = {7}\n" \
+               "organ_name_map = {8}\n{9}".format(
                    self.organs, self.models, self.integration_methods,
                    self.interpolation_methods, self.dose_binning_uncertainty,
-                   self.volume_ratio_uncertainty, self.organ_name_map,
+                   self.volume_ratio_uncertainty, self.bootstrap_max_samples,
+                   self.bootstrap_sample_mode, self.organ_name_map,
                    organ_output.rstrip())
 
     def generate_matlab_params(self):
@@ -495,7 +501,8 @@ class ConfigParams(object):
         # Assemble the params structure code.
         if self.dose_binning_uncertainty or self.volume_ratio_uncertainty \
            or self.integration_methods or self.interpolation_methods \
-           or self.organ_parameters:
+           or self.organ_parameters or self.bootstrap_max_samples \
+           or self.bootstrap_sample_mode:
             script += "params = struct;\n"
         else:
             script += "params = {};\n"
@@ -515,6 +522,12 @@ class ConfigParams(object):
         if self.interpolation_methods:
             script += "params.interpolation_methods = {0};\n".format(
                                                         interpolation_methods)
+        if self.bootstrap_max_samples:
+            script += "params.bootstrap_max_samples = {0};\n".format(
+                                                    self.bootstrap_max_samples)
+        if self.bootstrap_sample_mode:
+            script += "params.bootstrap_sample_mode = '{0}';\n".format(
+                                                    self.bootstrap_sample_mode)
         if self.organ_parameters:
             script += "params.organs = _organ_params;\n"
         return script
@@ -587,22 +600,42 @@ def load_config(filename, organlist, modellist):
             msg = "'volume_ratio_uncertainty' in the configuration file '{0}'" \
                   " must be an uncertainty model object.".format(filename)
             raise RunError(msg)
-        # The organ_name_map, organs and models is optional.
+        # The following fields are made optional.
         if 'organ_name_map' in variables:
             organ_name_map = variables['organ_name_map']
         else:
             organ_name_map = {}
+        if not isinstance(organ_name_map, dict):
+            raise RunError("'organ_name_map' in the configuration file"
+                           " '{0}' must be a dictionary.".format(filename))
         if 'organs' in variables:
             organs = variables['organs']
         else:
             organs = []
+        if not isinstance(organs, list):
+            raise RunError("'organs' in the configuration file '{0}' must"
+                           " be a list of strings.".format(filename))
         if 'models' in variables:
             models = variables['models']
         else:
             models = []
-        if not isinstance(organ_name_map, dict):
-            raise RunError("'organ_name_map' in the configuration file"
-                           " '{0}' must be a dictionary.".format(filename))
+        if not isinstance(organs, list):
+            raise RunError("'models' in the configuration file '{0}' must"
+                           " be a list of strings.".format(filename))
+        if 'bootstrap_max_samples' in variables:
+            bootstrap_max_samples = variables['bootstrap_max_samples']
+        else:
+            bootstrap_max_samples = 6435
+        if not isinstance(bootstrap_max_samples, int):
+            raise RunError("'bootstrap_max_samples' in the configuration file"
+                           " '{0}' must be an integer.".format(filename))
+        if 'bootstrap_sample_mode' in variables:
+            bootstrap_sample_mode = variables['bootstrap_sample_mode']
+        else:
+            bootstrap_sample_mode = 'adaptive'
+        if not isinstance(bootstrap_sample_mode, str):
+            raise RunError("'bootstrap_sample_mode' in the configuration file"
+                           " '{0}' must be a string.".format(filename))
     except IOError as e:
         raise RunError(str(e))
     except KeyError as e:
@@ -612,6 +645,7 @@ def load_config(filename, organlist, modellist):
     models += modellist
     return ConfigParams(integration_methods, interpolation_methods,
                         dose_binning_uncertainty, volume_ratio_uncertainty,
+                        bootstrap_max_samples, bootstrap_sample_mode,
                         organ_name_map, OrganParams.registery, organs, models)
 
 
@@ -627,7 +661,7 @@ def run():
     if args.configfile:
         params = load_config(args.configfile, args.organlist, args.modellist)
     else:
-        params = ConfigParams({}, [], None, None, {}, [],
+        params = ConfigParams({}, [], None, None, None, None, {}, [],
                               args.organlist, args.modellist)
     if args.printconfig:
         print("Parameter configuration:")

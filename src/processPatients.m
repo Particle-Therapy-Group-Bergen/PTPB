@@ -79,7 +79,9 @@ fields{3} = 'volume_ratio_uncertainty_model';
 fields{4} = 'volume_ratio_uncertainty';
 fields{5} = 'integration_methods';
 fields{6} = 'interpolation_methods';
-fields{7} = 'organs';
+fields{7} = 'bootstrap_max_samples';
+fields{8} = 'bootstrap_sample_mode';
+fields{9} = 'organs';
 for n = 1:length(fields)
     if ~ isfield(params, fields{n})
         error('Missing field "%s" in the params structure.', fields{n});
@@ -134,6 +136,9 @@ for n = 1:length(dvhfiles)
     end
 end
 
+max_samples = params.bootstrap_max_samples;
+sample_mode = params.bootstrap_sample_mode;
+
 % Now apply boot-strapping to organs/models across all patients.
 organ_names = fieldnames(organs_found);
 model_names = fieldnames(models_found);
@@ -158,7 +163,7 @@ for n = 1:length(organ_names)
         samples = [];
         stot = 1;
         for k = 1:nr
-            s = bootStrap(data(k,:))';
+            s = bootStrap(data(k,:), max_samples, sample_mode)';
             [snr, snc] = size(s);
             samples(1:snr,stot:stot+snc-1) = s;
             stot += snc;
@@ -212,5 +217,7 @@ params = struct('dose_binning_uncertainty_model', 'box',
                 'volume_ratio_uncertainty', p.volume_ratio_uncertainty,
                 'integration_methods', {integrationMethods},
                 'interpolation_methods', {interpolationMethods},
+                'bootstrap_max_samples', 6435,
+                'bootstrap_sample_mode', 'adaptive',
                 'organs', organParams);
 return;

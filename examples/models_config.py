@@ -26,6 +26,15 @@ integration_methods = {'trapz': 1e-5,
 # the OED values.
 interpolation_methods = ['linear', 'pchip', 'cubic', 'spline']
 
+# Indicates the maximum number of samples to produce when random sampling in
+# the boolStrap function. Refer to that function for more information.
+bootstrap_max_samples = 6435
+
+# The boot-strapping mode to use in the boolStrap function:
+#   'adaptive', 'exhaustive' or 'random'
+# Refer to that function for more information.
+bootstrap_sample_mode = 'adaptive'
+
 # The uncertainty model for the PlateauHall response model calculation used in
 # the OED.m function.
 # Available uncertainty models are:

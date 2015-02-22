@@ -89,6 +89,11 @@ end
 integrationMethods = params.integration_methods;
 interpolationMethods = params.interpolation_methods;
 
+% Using structs as a type of dictionary.
+organs_found = struct;
+models_found = struct;
+
+% Perform calculations such as computing OEDs per input file (i.e. per patient DVH).
 result = struct;
 for n = 1:length(dvhfiles)
     filename = dvhfiles{n};
@@ -123,9 +128,45 @@ for n = 1:length(dvhfiles)
             oeds = sampleOED(dvh, N, model, integrationMethods,
                              interpolationMethods, modelParams{:});
             result.OED_per_patient{n}.organs.(organ).(model) = oeds;
+            organs_found.(organ) = 1;
+            models_found.(model) = 1;
         end
     end
 end
+
+% Now apply boot-strapping to organs/models across all patients.
+organ_names = fieldnames(organs_found);
+model_names = fieldnames(models_found);
+for n = 1:length(organ_names)
+    organ = organ_names{n};
+    for m = 1:length(model_names)
+        model = model_names{m};
+        % Collect patient data into columns.
+        data = [];
+        for k = 1:length(dvhfiles)
+            if ~ isfield(result.OED_per_patient{k}.organs, organ)
+                continue
+            end
+            if ~ isfield(result.OED_per_patient{k}.organs.(organ), model)
+                continue
+            end
+            data = [data result.OED_per_patient{k}.organs.(organ).(model)];
+        end
+        % Boot-strap each set of samples from patients (each row in data) and
+        % collect all boot-strapped samples.
+        [nr, nc] = size(data);
+        samples = [];
+        stot = 1;
+        for k = 1:nr
+            s = bootStrap(data(k,:))';
+            [snr, snc] = size(s);
+            samples(1:snr,stot:stot+snc-1) = s;
+            stot += snc;
+        end
+        result.OED_bootstrap_samples.(organ).(model) = samples;
+    end
+end
+
 return;
 
 

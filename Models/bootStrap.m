@@ -1,5 +1,5 @@
 function samples = bootStrap(data, max_samples, sample_mode)
-%samples = bootStrap(data [, max_samples , sample_mode])
+%samples = bootStrap(data [, max_samples, sample_mode])
 %
 % Calculates samples of the data vector by resampled it using the boot strap method.
 %

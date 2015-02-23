@@ -10,7 +10,9 @@ function result = sampleOED(dvh, N, responseModel, integrationMethods, interpola
 %Parameters:
 %
 % dvh - The dose volume histogram structure as returned by the
-%       getDoseVolumeHistogram function.
+%       getDoseVolumeHistogram function. With two additional fields:
+%       dose_binning_uncertainty_model and volume_ratio_uncertainty_model which
+%       should be the uncertainty models passed to sampleDistribution().
 %
 % N - The number of samples to produce.
 %

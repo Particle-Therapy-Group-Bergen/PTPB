@@ -94,12 +94,17 @@ end
 result = zeros(N, 1);
 for n = 1:N
     dvh_samples = [dose_samples(n,:); volume_samples(n,:)]';
-    model_param_samples = mat2cell(modelParams(n,:), 1, ones(length(varargin), 1));
+    [nr, nc] = size(modelParams);
+    if nr*nc > 0
+        model_param_samples = mat2cell(modelParams(n,:), 1, ones(length(varargin), 1));
+    else
+        model_param_samples = {};
+    end
 
     % Randomly select the integration and interpolation method.
-    index = randi(length(integrationMethods));
+    index = randInt(length(integrationMethods));
     integrationMethod = integrationMethods{index};
-    index = randi(length(interpolationMethods));
+    index = randInt(length(interpolationMethods));
     interpolationMethod = interpolationMethods{index};
 
     options = struct('integration_method', integrationMethod.name,
@@ -108,3 +113,12 @@ for n = 1:N
 
     result(n) = OED(responseModel, dvh_samples, options, model_param_samples{:});
 end
+
+
+function y = randInt(imax)
+if exist('randi')
+    y = randi(imax);
+else
+    y = floor(rand * imax) + 1;
+end
+return;

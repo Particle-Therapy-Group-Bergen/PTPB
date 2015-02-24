@@ -33,11 +33,7 @@ import argparse
 import collections
 import subprocess
 import textwrap
-
-
-class RunError(Exception):
-    """Exception class for run time errors handled by this script."""
-    pass
+from processPatients import RunError
 
 
 def prepare_argument_parser():
@@ -50,6 +46,11 @@ def prepare_argument_parser():
             sampled data produced by the sampleDVH.py tool.""")
     argparser.add_argument("filelist", metavar = "<file>", nargs = '+',
         help = """One or more input sampled data files.""")
+    argparser.add_argument("-o", "--organ", dest = "organlist",
+        default = [], metavar = "<name>[:<file>]", action = "append",
+        help = """The name of an organ for which to plot. A file name can be
+            given after the colon to indicate that the organ selection should
+            apply to a specific file.""")
     argparser.add_argument("-O", "--outfile", dest = "outputfile",
         default = "output.eps", metavar = "<file>", action = "store",
         help = """The name of the output file for the plot.""")
@@ -61,6 +62,15 @@ def prepare_argument_parser():
         default = "0:1:100", metavar = "<range>", action = "store",
         help = """The dose binning points for interpolation. Must be in Matlab
             colon notation for ranges or vector declaration syntax.""")
+    argparser.add_argument("-I", "--interpolation", dest = "interpMethod",
+        default = "pchip", metavar = "<file>", action = "store",
+        help = """The interpolation method to use. See Octave interp1() for
+            available values. The default is 'pchip'.""")
+    argparser.add_argument("-D", "--density", dest = "plotdensity",
+        default = False, action = "store_true",
+        help = """If given then the output plot will be a uncertainty density
+            plot rather than quantile curves. By default quantile curves are
+            drawn.""")
     return argparser
 
 
@@ -75,17 +85,48 @@ def run():
     script = ""
     fileliststr = ", ".join(map(lambda x: "'{0}'".format(x), args.filelist))
     script += "inputfiles = {" + fileliststr + "};\n"
+    # Add the organ list.
+    organliststr = ", ".join(map(lambda x: "'{0}'".format(x), args.organlist))
+    script += "organlist = {" + organliststr + "};\n"
+    # Add other needed parameters.
     script += "outfilename = '{0}';\n".format(args.outputfile);
-    script += "interpMethod = 'pchip';\n"
+    script += "interpMethod = '{0}';\n".format(args.interpMethod);
     script += "dosebins = {0};\n".format(args.bins);
     script += "quantilebins = {0};\n".format(args.quantiles);
+    script += "plotdensity = {0};\n".format('1' if args.plotdensity else '0');
     # Add commands to load the DVHs.
     script += textwrap.dedent("""\
-        inputfile = inputfiles{1};
-        Samples = load(inputfile, 'Samples').Samples;
-        [X, Y] = calcDVHquantiles(Samples.doses, Samples.volumebins,
-                                  dosebins, quantilebins, interpMethod);
-        plot(X, Y);
+        for n = 1:length(inputfiles)
+            inputfile = inputfiles{n};
+            try
+                Samples = load(inputfile, 'Samples').Samples;
+            catch
+                error(sprintf('Missing Samples in "%s".', inputfile));
+            end
+            if ~ isstruct(Samples)
+                error(sprintf('Samples in "%s" is not a structure.', inputfile));
+            end
+            if length(organlist) > 0
+                organs = organlist;
+            else
+                organs = fieldnames(Samples.doses);
+            end
+            for m = 1:length(organs)
+                organ = organs{m};
+                [X, Y] = calcDVHquantiles(Samples.doses.(organ), Samples.volumebins,
+                                          dosebins, quantilebins, interpMethod);
+                if plotdensity
+                    colormap hot;
+                    [X, Y, Z] = contoursToMatrix(X(:,1), Y');
+                    surf(X, Y, Z);
+                    shading interp;
+                    view(2);
+                else
+                    plot(X, Y);
+                end
+                hold on;
+            end
+        end
         print('-landscape', '-color', outfilename);
         """)
     # Invoke octave to execute the Matlab script.

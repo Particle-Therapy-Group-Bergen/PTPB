@@ -33,11 +33,93 @@ import argparse
 import collections
 import subprocess
 import textwrap
+from numpy import arange, linspace
+from processPatients import RunError, UncertaintyModel, Delta, DoubleDelta, \
+                            Box, Box95, Triangle, Triangle95, Triangle95mode, \
+                            Gaus, Gaus95, LogNorm, LogNorm95
 
 
-class RunError(Exception):
-    """Exception class for run time errors handled by this script."""
-    pass
+class ConfigParams(object):
+    """
+    Object to represent configuration parameters loaded from the external
+    configuration file.
+    """
+
+    def __init__(self, volume_bins, interpolation_method,
+                 dose_binning_uncertainty, volume_ratio_uncertainty,
+                 bootstrap_max_samples, bootstrap_sample_mode,
+                 organ_name_map, organs):
+        self.interpolation_method = interpolation_method
+        self.dose_binning_uncertainty = dose_binning_uncertainty
+        self.volume_ratio_uncertainty = volume_ratio_uncertainty
+        self.bootstrap_max_samples = bootstrap_max_samples
+        self.bootstrap_sample_mode = bootstrap_sample_mode
+        self.organ_name_map = organ_name_map
+        self.organs = organs
+        self.volume_bins = volume_bins
+
+    def __repr__(self):
+        return "volume_bins = {0}\n" \
+               "interpolation_method = {1}\n" \
+               "dose_binning_uncertainty = {2}\n" \
+               "volume_ratio_uncertainty = {3}\n" \
+               "bootstrap_max_samples = {4}\n" \
+               "bootstrap_sample_mode = {5}\n" \
+               "organ_name_map = {6}\n" \
+               "organs = {7}".format(
+                   self.volume_bins, self.interpolation_method,
+                   self.dose_binning_uncertainty, self.volume_ratio_uncertainty,
+                   self.bootstrap_max_samples, self.bootstrap_sample_mode,
+                   self.organ_name_map, self.organs)
+
+    def generate_matlab_params(self):
+        """generate_matlab_params() -> string
+
+        Generates a string containing Matlab code to prepare the parameters
+        needed for the sampleDVH.m function.
+        """
+        script = ""
+        if self.volume_bins:
+            script += "volumebins = {0};\n".format(self.volume_bins)
+        # Prepare the organ_name_map variable.
+        func = lambda x: "'{0}', '{1}'".format(x, self.organ_name_map[x])
+        liststr = "; ".join(map(func, self.organ_name_map))
+        organmapstr = "{" + liststr + "}"
+        # Prepare the organ list.
+        liststr = ", ".join(map(lambda x: "'{0}'".format(x), self.organs))
+        organliststr = "{" + liststr + "}"
+        script += textwrap.dedent("""\
+            organ_name_map = {0};
+            organs = {1};
+            params = struct;
+            params.interpolation_method = '{2}';
+            params.bootstrap_max_samples = {3};
+            params.bootstrap_sample_mode = '{4}';
+            """.format(organmapstr, organliststr, self.interpolation_method,
+                       self.bootstrap_max_samples, self.bootstrap_sample_mode))
+        if self.dose_binning_uncertainty:
+            script += textwrap.dedent("""\
+                params.dose_binning_uncertainty_model = '{0}';
+                params.dose_binning_uncertainty = {1};
+                """.format(self.dose_binning_uncertainty.get_name(),
+                           self.dose_binning_uncertainty.get_range()))
+        else:
+            script += textwrap.dedent("""\
+                params.dose_binning_uncertainty_model = 'box';
+                params.dose_binning_uncertainty = getParameters('histogram_uncertainty').dose_binning_uncertainty;
+                """)
+        if self.volume_ratio_uncertainty:
+            script += textwrap.dedent("""\
+                params.volume_ratio_uncertainty_model = '{0}';
+                params.volume_ratio_uncertainty = {1};
+                """.format(self.volume_ratio_uncertainty.get_name(),
+                           self.volume_ratio_uncertainty.get_range()))
+        else:
+            script += textwrap.dedent("""\
+                params.volume_ratio_uncertainty_model = 'box';
+                params.volume_ratio_uncertainty = getParameters('histogram_uncertainty').volume_ratio_uncertainty;
+                """)
+        return script
 
 
 def prepare_argument_parser():
@@ -53,9 +135,16 @@ def prepare_argument_parser():
         help = """DVH input files to process. Must be in Matlab format (.mat)
             that can be converted with the convertDVHtoMatlabFile.sh script from
             text files.""")
+    argparser.add_argument("-c", "--config", dest = "configfile",
+        default = None, metavar = "<file>", action = "store",
+        help = """Provides a configuration file for the sampling parameters.
+            The file uses python syntax.""")
+    argparser.add_argument("-p", "--print", dest = "printconfig",
+        default = False, action = "store_true",
+        help = """Prints the configuration loaded.""")
     argparser.add_argument("-o", "--organ", dest = "organlist",
         default = [], metavar = "<name>", action = "append",
-        help = """A name of an organ to process.""")
+        help = """The name of an organ for which to process the DVH.""")
     argparser.add_argument("-O", "--outfile", dest = "outputfile",
         default = "output.mat", metavar = "<file>", action = "store",
         help = """The name of the output file to write.""")
@@ -70,6 +159,79 @@ def prepare_argument_parser():
     return argparser
 
 
+def load_config(filename, organlist):
+    """load_config(string, list) -> object
+
+    Load parameter configurations from the given filename. Also need to provide
+    the default organ list.
+    """
+    variables = {'Delta': Delta, 'DoubleDelta': DoubleDelta,
+                 'Box': Box, 'Box95': Box95, 'Triangle': Triangle,
+                 'Triangle95': Triangle95, 'Triangle95mode': Triangle95mode,
+                 'Gaus': Gaus, 'Gaus95': Gaus95, 'LogNorm': LogNorm,
+                 'LogNorm95': LogNorm95, 'arange': arange, 'linspace': linspace}
+    try:
+        execfile(filename, variables)
+        interpolation_method = variables['interpolation_method']
+        if not isinstance(interpolation_method, str):
+            raise RunError("'interpolation_method' in the configuration file"
+                           " '{0}' must be a string.".format(filename))
+        dose_binning_uncertainty = variables['dose_binning_uncertainty']
+        if not isinstance(dose_binning_uncertainty, UncertaintyModel):
+            msg = "'dose_binning_uncertainty' in the configuration file '{0}'" \
+                  " must be an uncertainty model object.".format(filename)
+            raise RunError(msg)
+        volume_ratio_uncertainty = variables['volume_ratio_uncertainty']
+        if not isinstance(volume_ratio_uncertainty, UncertaintyModel):
+            msg = "'volume_ratio_uncertainty' in the configuration file '{0}'" \
+                  " must be an uncertainty model object.".format(filename)
+            raise RunError(msg)
+        bootstrap_max_samples = variables['bootstrap_max_samples']
+        if not isinstance(bootstrap_max_samples, int):
+            raise RunError("'bootstrap_max_samples' in the configuration file"
+                           " '{0}' must be an integer.".format(filename))
+        bootstrap_sample_mode = variables['bootstrap_sample_mode']
+        if not isinstance(bootstrap_sample_mode, str):
+            raise RunError("'bootstrap_sample_mode' in the configuration file"
+                           " '{0}' must be a string.".format(filename))
+        # The following fields are made optional.
+        if 'volume_bins' in variables:
+            volume_bins = variables['volume_bins']
+            T = type(arange(0,1))
+            if not isinstance(volume_bins, list) \
+               and not isinstance(volume_bins, T):
+                msg = "'volume_bins' in the configuration file '{0}' must be" \
+                      " a list or numpy array.".format(filename)
+                raise RunError(msg)
+        else:
+            volume_bins = None;
+        if 'organ_name_map' in variables:
+            organ_name_map = variables['organ_name_map']
+        else:
+            organ_name_map = {}
+        if not isinstance(organ_name_map, dict):
+            raise RunError("'organ_name_map' in the configuration file '{0}'"
+                           " must be a dictionary.".format(filename))
+        if 'organs' in variables:
+            organs = variables['organs']
+            if not isinstance(organ, list):
+                raise RunError("'organs' in the configuration file '{0}' must"
+                               " be a list of strings.".format(filename))
+        else:
+            organs = []
+    except IOError as e:
+        raise RunError(str(e))
+    except KeyError as e:
+        raise RunError("Missing declaration of variable {0} in the"
+                       " configuration file '{1}'.".format(e, filename))
+    organs += organlist
+    organs = list(set(organs))  # make unique
+    return ConfigParams(volume_bins, interpolation_method,
+                        dose_binning_uncertainty, volume_ratio_uncertainty,
+                        bootstrap_max_samples, bootstrap_sample_mode,
+                        organ_name_map, organs)
+
+
 def run():
     """run() -> None
 
@@ -77,34 +239,57 @@ def run():
     """
     argparser = prepare_argument_parser()
     args = argparser.parse_args()
-    # Prepare the Matlab script to execute, starting with the DVH file list.
+    # Load the configuration file and print it if so requested.
+    if args.configfile:
+        params = load_config(args.configfile, args.organlist)
+        if args.bins:
+            # Override the volume bins from the command line.
+            params.volume_bins = args.bins
+    else:
+        organs = list(set(args.organlist))  # make unique
+        params = ConfigParams(args.bins, 'pchip', None, None, 6435, 'adaptive',
+                              {}, organs)
+    if args.printconfig:
+        print("Parameter configuration:")
+        if args.configfile:
+            print(params)
+        else:
+            print("(No config given. Using default internal parameters.)")
+    # Prepare the Matlab script to execute, starting with the DVH file list and
+    # output file name.
     script = ""
     fileliststr = ", ".join(map(lambda x: "'{0}'".format(x), args.filelist))
     script += "dvhfiles = {" + fileliststr + "};\n"
-    # Setup additional input parameters.
     script += "outfilename = '{0}';\n".format(args.outputfile)
-    script += "organ_name_map = {'Bladder_P', 'Bladder'};\n"
-    script += "organ = 'Bladder';\n"
-    script += "params = struct;\n"
-    script += "params.dose_binning_uncertainty_model = 'box';\n"
-    script += "params.volume_ratio_uncertainty_model = 'box';\n"
-    script += "params.interpolation_method = 'pchip';\n"
-    script += "params.bootstrap_max_samples = 6435;\n"
-    script += "params.bootstrap_sample_mode = 'adaptive';\n"
     script += "nsamples = {0};\n".format(args.nsamples)
-    if args.bins:
-        script += "volumebins = {0};\n".format(args.bins)
-    # Add commands to load the DVHs.
+    # Setup additional input parameters.
+    script += params.generate_matlab_params()
+    # Add commands to load the DVHs and collect the set of all organs.
     script += textwrap.dedent("""\
         dvhs = {};
+        organset = struct;
         for n = 1:length(dvhfiles)
-            dvhs{n} = getDoseVolumeHistogram(dvhfiles{n}, organ_name_map, organ).(organ);
+            dvhs{n} = getDoseVolumeHistogram(dvhfiles{n}, organ_name_map, params);
+            organnames = fieldnames(dvhs{n});
+            for m = 1:length(organnames)
+                organset.(organnames{m}) = 1;
+            end
+        end
+        if length(organs) == 0
+            organs = fieldnames(organset);
         end
         """)
     # Add the function calls to merge data if the output file already exists.
     if os.path.exists(args.outputfile):
         script += textwrap.dedent("""\
-            Samples = load(outfilename, 'Samples').Samples;
+            try
+                Samples = load(outfilename, 'Samples').Samples;
+            catch
+                error(sprintf('Missing Samples in "%s".', outfilename));
+            end
+            if ~ isstruct(Samples)
+                error(sprintf('Samples in "%s" is not a structure.', outfilename));
+            end
             if ~ exist('volumebins')
                 volumebins = Samples.volumebins;
             end
@@ -120,11 +305,31 @@ def run():
             if ~ exist('volumebins')
                 volumebins = 0:0.1:1;
             end
-            Samples = struct('doses', [], 'volumebins', volumebins);
+            Samples = struct('doses', struct(), 'volumebins', volumebins);
             """)
+    # Add the function call to generate/merge samples and save to file.
     script += textwrap.dedent("""\
-        S = sampleDVH(dvhs, nsamples, volumebins, params);
-        Samples.doses = [Samples.doses; S];
+        for n = 1:length(organs)
+            organ = organs{n};
+            dvh_subset = {};
+            k = 1;
+            for m = 1:length(dvhs)
+                if isfield(dvhs{m}, organ)
+                    dvh_subset{k} = dvhs{m}.(organ);
+                    k += 1;
+                end
+            end
+            if length(dvh_subset) == 0
+                warning(sprintf('No DVHs found for organ "%s".', organ));
+                continue;
+            end
+            S = sampleDVH(dvh_subset, nsamples, volumebins, params);
+            if isfield(Samples.doses, (organ))
+                Samples.doses.(organ) = [Samples.doses.(organ); S];
+            else
+                Samples.doses.(organ) = S;
+            end
+        end
         save('-7', outfilename, 'Samples');
         """)
     # Invoke octave to execute the Matlab script.

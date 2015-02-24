@@ -30,7 +30,6 @@ from __future__ import print_function
 import os
 import sys
 import argparse
-import collections
 import subprocess
 import textwrap
 from numpy import arange, linspace

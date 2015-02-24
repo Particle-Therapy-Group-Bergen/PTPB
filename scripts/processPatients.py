@@ -644,6 +644,8 @@ def load_config(filename, organlist, modellist):
                        " configuration file '{1}'.".format(e, filename))
     organs += organlist
     models += modellist
+    organs = list(set(organs))  # make unique
+    models = list(set(models))  # make unique
     return ConfigParams(integration_methods, interpolation_methods,
                         dose_binning_uncertainty, volume_ratio_uncertainty,
                         bootstrap_max_samples, bootstrap_sample_mode,
@@ -662,8 +664,10 @@ def run():
     if args.configfile:
         params = load_config(args.configfile, args.organlist, args.modellist)
     else:
+        organs = list(set(args.organlist))
+        models = list(set(args.modellist))
         params = ConfigParams({}, [], None, None, None, None, {}, [],
-                              args.organlist, args.modellist)
+                              organs, models)
     if args.printconfig:
         print("Parameter configuration:")
         if args.configfile:

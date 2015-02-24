@@ -619,7 +619,7 @@ def load_config(filename, organlist, modellist):
             models = variables['models']
         else:
             models = []
-        if not isinstance(organs, list):
+        if not isinstance(models, list):
             raise RunError("'models' in the configuration file '{0}' must"
                            " be a list of strings.".format(filename))
         if 'bootstrap_max_samples' in variables:

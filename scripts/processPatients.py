@@ -548,7 +548,7 @@ def prepare_argument_parser():
             text files.""")
     argparser.add_argument("-c", "--config", dest = "configfile",
         default = None, metavar = "<file>", action = "store",
-        help = """provides a configuration file for the organ/model
+        help = """Provides a configuration file for the organ/model
             parameters that uses python syntax.""")
     argparser.add_argument("-p", "--print", dest = "printconfig",
         default = False, action = "store_true",

@@ -86,8 +86,18 @@ def run():
     fileliststr = ", ".join(map(lambda x: "'{0}'".format(x), args.filelist))
     script += "inputfiles = {" + fileliststr + "};\n"
     # Add the organ list.
-    organliststr = ", ".join(map(lambda x: "'{0}'".format(x), args.organlist))
-    script += "organlist = {" + organliststr + "};\n"
+    organlist = collections.defaultdict(list)
+    for item in args.organlist:
+        organ, seperator, filename = item.partition(':')
+        if filename:
+            organlist[organ].append(filename)
+        else:
+            organlist[organ].extend(args.filelist)
+    script += "organlist = struct;\n"
+    for key in organlist:
+        fileliststr = ", ".join(map(lambda x: "'{0}'".format(x),
+                                    organlist[key]))
+        script += "organlist." + key + " = {" + fileliststr + "};\n"
     # Add other needed parameters.
     script += "outfilename = '{0}';\n".format(args.outputfile);
     script += "interpMethod = '{0}';\n".format(args.interpMethod);
@@ -106,8 +116,18 @@ def run():
             if ~ isstruct(Samples)
                 error(sprintf('Samples in "%s" is not a structure.', inputfile));
             end
-            if length(organlist) > 0
-                organs = organlist;
+            if length(fieldnames(organlist)) > 0
+                names = fieldnames(organlist);
+                organs = {};
+                k = 1;
+                % Find all organ names that refer to the current inputfile.
+                for m = 1:length(names)
+                    [index, errmsg] = cellidx(organlist.(names{m}), inputfile);
+                    if index > 0
+                        organs{k} = names{m};
+                        k += 1;
+                    end
+                end
             else
                 organs = fieldnames(Samples.doses);
             end

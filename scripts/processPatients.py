@@ -34,6 +34,7 @@ import sys
 import argparse
 import collections
 import subprocess
+import textwrap
 
 
 class RunError(Exception):
@@ -677,19 +678,24 @@ def run():
     script = ""
     fileliststr = ", ".join(map(lambda x: "'{0}'".format(x), args.filelist))
     script += "dvhfiles = {" + fileliststr + "};\n"
-    # Add the parameter script snipet.
-    if params is None:
-        script += "params = {};\n"
-    else:
-        script += params.generate_matlab_params()
+    # Add the parameter script snippet.
+    script += params.generate_matlab_params()
     # Add the function call to process the patient input files.
     script += "Results = processPatients(dvhfiles, params, organs, models," \
               " organ_name_map, {0});\n".format(args.nsamples)
     # Add the function calls to merge data if the output file already exists.
     if os.path.exists(args.outputfile):
-        script += "Previous = load('{0}', 'Results').Results;\n".format(
-                                                                args.outputfile)
-        script += "Results = mergePatientResults(Previous, Results);\n"
+        script += textwrap.dedent("""\
+            try
+                Previous = load('{0}', 'Results').Results;
+            catch
+                error('Missing Results in "{0}".');
+            end
+            if ~ isstruct(Previous)
+                error('Results in "{0}" is not a structure.');
+            end
+            Results = mergePatientResults(Previous, Results);
+            """.format(args.outputfile))
     script += "save('-7', '{0}', 'Results');\n".format(args.outputfile)
     # Invoke octave to execute the Matlab script.
     command_less_script = ['octave', '-q', '--path', '@@MFILE_PATH@@', '--eval']

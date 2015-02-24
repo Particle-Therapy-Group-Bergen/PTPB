@@ -63,7 +63,7 @@ def prepare_argument_parser():
         help = """The dose binning points for interpolation. Must be in Matlab
             colon notation for ranges or vector declaration syntax.""")
     argparser.add_argument("-I", "--interpolation", dest = "interpMethod",
-        default = "pchip", metavar = "<file>", action = "store",
+        default = "pchip", metavar = "<method>", action = "store",
         help = """The interpolation method to use. See Octave interp1() for
             available values. The default is 'pchip'.""")
     argparser.add_argument("-D", "--density", dest = "plotdensity",

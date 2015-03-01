@@ -62,6 +62,10 @@ def prepare_argument_parser():
         default = "0:0.1:1", metavar = "<range>", action = "store",
         help = """The quantiles binning vector. Must be in Matlab colon notation
             for ranges or vector declaration syntax.""")
+    argparser.add_argument("-e", "--extra-curves", dest = "num_extra_curves",
+        default = 0, action = "store", type = int,
+        help = """Indicates the number of extra linearly interpolated curves to
+            draw between each pair of quantile curves. The default is zero.""")
     argparser.add_argument("-B", "--bins", dest = "bins",
         default = "0:1:100", metavar = "<range>", action = "store",
         help = """The dose binning points for interpolation. Must be in Matlab
@@ -118,6 +122,7 @@ def make_matlab_script(args):
     script += "interpMethod = '{0}';\n".format(args.interpMethod);
     script += "dosebins = {0};\n".format(args.bins);
     script += "quantilebins = {0};\n".format(args.quantiles);
+    script += "num_extra_curves = {0};\n".format(args.num_extra_curves);
     script += "plotdensity = {0};\n".format('1' if args.plotdensity else '0');
     script += "make_gnuplot = {0};\n".format('1' if args.make_gnuplot else '0');
     # Add commands to load the DVHs.
@@ -156,6 +161,21 @@ def make_matlab_script(args):
                 organ = organs{m};
                 [X, Y] = calcDVHquantiles(Samples.doses.(organ), Samples.volumebins,
                                           dosebins, quantilebins, interpMethod);
+                % Interpolate the curves linearly along the Y direction to get a
+                % higher curve density.
+                [nr, nc] = size(Y);
+                newY = [];
+                lambda = linspace(0, 1, 2 + num_extra_curves);
+                lambda = repmat(lambda(2:length(lambda)-1), nr, 1);
+                for k = 1:nc-1
+                    y1 = repmat(Y(:,k), 1, size(lambda, 2));
+                    y2 = repmat(Y(:,k+1), 1, size(lambda, 2));
+                    interpolatedY = y1 .* (1 - lambda) + y2 .* lambda;
+                    newY = [newY, Y(:,k), interpolatedY];
+                end
+                newY = [newY, Y(:,nc)];
+                Y = newY;
+                X = repmat(X(:,1), 1, size(Y, 2));
                 if make_gnuplot
                     if length(data) == 0
                         data = X(:,1);
@@ -347,6 +367,8 @@ def run():
     """
     argparser = prepare_argument_parser()
     args = argparser.parse_args()
+    if args.num_extra_curves < 0:
+        raise RunError("The number of extra curves must be a positive integer.")
     script = make_matlab_script(args)
     # Invoke octave to execute the Matlab script.
     command_less_script = ['octave', '-q', '--path', '@@MFILE_PATH@@', '--eval']

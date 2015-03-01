@@ -73,6 +73,8 @@ return;
 function y = interpolate(xp, yp, x, method)
 % Interpolation function that sets all values below the data points X range to 1 and
 % all above to zero.
+[xp, indices] = sort(xp);
+yp = yp(indices);
 y = interp1(xp, yp, x, method);
 min_non_nan = min(find(~ isnan(y)));
 indices = find(isnan(y));

@@ -42,6 +42,23 @@ class RunError(Exception):
     pass
 
 
+class SetUnique(argparse.Action):
+    """
+    A parser action class that ensures an argument was only set once on the
+    command line.
+    """
+
+    def __init__(self, *args, **kwargs):
+        argparse.Action.__init__(self, *args, **kwargs)
+        self.alreadyset = False
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.alreadyset:
+            raise argparse.ArgumentError(self, "can only be given once")
+        setattr(namespace, self.dest, value)
+        self.alreadyset = True
+
+
 class UncertaintyModel(object):
     """Base class for uncertainty models."""
 
@@ -548,7 +565,7 @@ def prepare_argument_parser():
             that can be converted with the convertDVHtoMatlabFile.sh script from
             text files.""")
     argparser.add_argument("-c", "--config", dest = "configfile",
-        default = None, metavar = "<file>", action = "store",
+        default = None, metavar = "<file>", action = SetUnique,
         help = """Provides a configuration file for the organ/model
             parameters that uses python syntax.""")
     argparser.add_argument("-p", "--print", dest = "printconfig",
@@ -561,10 +578,10 @@ def prepare_argument_parser():
         default = [], metavar = "<name>", action = "append",
         help = """A response model to calculate.""")
     argparser.add_argument("-O", "--outfile", dest = "outputfile",
-        default = "output.mat", metavar = "<file>", action = "store",
+        default = "output.mat", metavar = "<file>", action = SetUnique,
         help = """The name of the output file to write.""")
     argparser.add_argument("-N", "--nsamples", dest = "nsamples",
-        default = 100, metavar = "<number>", action = "store",
+        default = 100, metavar = "<number>", action = SetUnique,
         help = """The number of samples to generate when performing the
             Monte-Carlo sampling.""")
     return argparser

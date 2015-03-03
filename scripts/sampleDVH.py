@@ -35,7 +35,7 @@ import textwrap
 from numpy import arange, linspace
 from processPatients import RunError, UncertaintyModel, Delta, DoubleDelta, \
                             Box, Box95, Triangle, Triangle95, Triangle95mode, \
-                            Gaus, Gaus95, LogNorm, LogNorm95
+                            Gaus, Gaus95, LogNorm, LogNorm95, SetUnique
 
 
 class ConfigParams(object):
@@ -135,7 +135,7 @@ def prepare_argument_parser():
             that can be converted with the convertDVHtoMatlabFile.sh script from
             text files.""")
     argparser.add_argument("-c", "--config", dest = "configfile",
-        default = None, metavar = "<file>", action = "store",
+        default = None, metavar = "<file>", action = SetUnique,
         help = """Provides a configuration file for the sampling parameters.
             The file uses python syntax.""")
     argparser.add_argument("-p", "--print", dest = "printconfig",
@@ -145,14 +145,14 @@ def prepare_argument_parser():
         default = [], metavar = "<name>", action = "append",
         help = """The name of an organ for which to process the DVH.""")
     argparser.add_argument("-O", "--outfile", dest = "outputfile",
-        default = "output.mat", metavar = "<file>", action = "store",
+        default = "output.mat", metavar = "<file>", action = SetUnique,
         help = """The name of the output file to write.""")
     argparser.add_argument("-N", "--nsamples", dest = "nsamples",
-        default = 10, metavar = "<number>", action = "store",
+        default = 10, metavar = "<number>", action = SetUnique,
         help = """The number of samples to generate when performing the
             Monte-Carlo sampling.""")
     argparser.add_argument("-B", "--bins", dest = "bins",
-        default = None, metavar = "<range>", action = "store",
+        default = None, metavar = "<range>", action = SetUnique,
         help = """The volume-ratio binning points for interpolation. Must be
             in Matlab colon notation for ranges.""")
     return argparser

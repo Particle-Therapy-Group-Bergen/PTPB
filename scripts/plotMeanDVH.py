@@ -35,7 +35,7 @@ import argparse
 import collections
 import subprocess
 import textwrap
-from processPatients import RunError
+from processPatients import RunError, SetUnique
 
 
 def prepare_argument_parser():
@@ -54,24 +54,24 @@ def prepare_argument_parser():
             given after the colon to indicate that the organ selection should
             apply to a specific file.""")
     argparser.add_argument("-O", "--outfile", dest = "outputfile",
-        default = "output.eps", metavar = "<file>", action = "store",
+        default = "output.eps", metavar = "<file>", action = SetUnique,
         help = """The name of the output file for the plot. If gnuplot script
             creation was requested then two additional files will be produced
             with the same basename but extensions '.gp' and '.dat'.""")
     argparser.add_argument("-Q", "--quantiles", dest = "quantiles",
-        default = "0:0.1:1", metavar = "<range>", action = "store",
+        default = "0:0.1:1", metavar = "<range>", action = SetUnique,
         help = """The quantiles binning vector. Must be in Matlab colon notation
             for ranges or vector declaration syntax.""")
     argparser.add_argument("-e", "--extra-curves", dest = "num_extra_curves",
-        default = 0, action = "store", type = int,
+        default = 0, action = SetUnique, type = int,
         help = """Indicates the number of extra linearly interpolated curves to
             draw between each pair of quantile curves. The default is zero.""")
     argparser.add_argument("-B", "--bins", dest = "bins",
-        default = "0:1:100", metavar = "<range>", action = "store",
+        default = "0:1:100", metavar = "<range>", action = SetUnique,
         help = """The dose binning points for interpolation. Must be in Matlab
             colon notation for ranges or vector declaration syntax.""")
     argparser.add_argument("-I", "--interpolation", dest = "interpMethod",
-        default = "pchip", metavar = "<method>", action = "store",
+        default = "pchip", metavar = "<method>", action = SetUnique,
         help = """The interpolation method to use. See Octave interp1() for
             available values. The default is 'pchip'.""")
     argparser.add_argument("-D", "--density", dest = "plotdensity",

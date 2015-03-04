@@ -48,6 +48,9 @@ datapoints = [scale_dose(dvh.datapoints(:,1), organ), dvh.datapoints(:,2)];
 range_low = [scale_dose(dvh.range_low(:,1), organ), dvh.range_low(:,2)];
 range_high = [scale_dose(dvh.range_high(:,1), organ), dvh.range_high(:,2)];
 result = struct('datapoints', datapoints, 'range_low', range_low, 'range_high', range_high);
+if isfield(dvh, 'units')
+    result.units = dvh.units;
+end
 return
 
 

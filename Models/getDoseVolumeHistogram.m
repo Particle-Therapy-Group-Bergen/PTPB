@@ -11,6 +11,8 @@ function result = getDoseVolumeHistogram(filename, varargin)
 %as a structure with each field naming a specific organ.
 %The data points are returned as a Nx2 matrix with the first column containing
 %the dose values and the second the volume fraction.
+%Units for each dimention are stored as a cell array of strings under the
+%field name, 'units'.
 %
 %Parameters:
 % filename - The name of the .mat file to load the data from.
@@ -138,6 +140,7 @@ for n = 1:length(organs)
     warning('The ratioToTotalVolume field is empty so will use structureVolume for "%s" instead.', organ_name);
     extra_error = abs(organs{n}.structureVolume(1) - organs{n}.volume) / min([organs{n}.structureVolume(1), organs{n}.volume]);
     organs{n}.ratioToTotalVolume = organs{n}.structureVolume / organs{n}.structureVolume(1);
+    organs{n}.ratioToTotalVolumeUnit = organs{n}.structureVolumeUnit;
   end
   if length(size(organs{n}.dose)) ~= length(size(organs{n}.ratioToTotalVolume))
     warning('The dose and ratioToTotalVolume fields are not the same size so "%s" will be skipped.', organ_name);
@@ -179,6 +182,7 @@ for n = 1:length(organs)
   end
 
   result.(organ_name).datapoints = [organs{n}.dose; organs{n}.ratioToTotalVolume];
+  result.(organ_name).units = {organs{n}.doseUnit, organs{n}.ratioToTotalVolumeUnit};
 
   % Calculate uncertainty ranges for the data points.
   dose_min = organs{n}.dose - params.dose_binning_uncertainty;

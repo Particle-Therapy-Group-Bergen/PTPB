@@ -142,6 +142,14 @@ def make_matlab_script(args):
             if ~ isstruct(Samples)
                 error(sprintf('Samples in "%s" is not a structure.', inputfile));
             end
+            if ~ exist('volumeUnit')
+                volumeUnit = Samples.volumebinUnit;
+            else
+                if ~ strcmp(volumeUnit, Samples.volumebinUnit)
+                    warning('Found a different volume ratio unit "%s" in "%s" than the existing "%s".',
+                            Samples.volumebinUnit, inputfile, volumebinUnit);
+                end
+            end
             if length(fieldnames(organlist)) > 0
                 names = fieldnames(organlist);
                 organs = {};
@@ -159,6 +167,14 @@ def make_matlab_script(args):
             end
             for m = 1:length(organs)
                 organ = organs{m};
+                if ~ exist('doseUnit')
+                    doseUnit = Samples.doseUnits.(organ);
+                else
+                    if ~ strcmp(doseUnit, Samples.doseUnits.(organ))
+                        warning('Found a different dose unit "%s" in "%s" for "%s" than the existing "%s".',
+                                Samples.doseUnits.(organ), inputfile, organ, volumebinUnit);
+                    end
+                end
                 [X, Y] = calcDVHquantiles(Samples.doses.(organ), Samples.volumebins,
                                           dosebins, quantilebins, interpMethod);
                 % Interpolate the curves linearly along the Y direction to get a
@@ -189,11 +205,11 @@ def make_matlab_script(args):
                     if plotdensity
                         colormap hot;
                         [X, Y, Z] = contoursToMatrix(X(:,1), Y');
-                        surf(X, Y, Z);
+                        surf(X, Y * 100, Z);
                         shading interp;
                         view(2);
                     else
-                        plot(X, Y);
+                        plot(X, Y * 100);
                     end
                     hold on;
                 end
@@ -202,6 +218,8 @@ def make_matlab_script(args):
         if make_gnuplot
             save('-ascii', sprintf('%s.dat', outfilename), 'data');
             printf('%g %g\\n', min(data(:,1)), max(data(:,1)));
+            printf('%s\\n', doseUnit);
+            printf('%s\\n', volumeUnit);
             for n = 1:data_i-1
                 printf('%d %d %s\\n', data_index(n), data_N(n), data_organs{n});
             end
@@ -211,8 +229,16 @@ def make_matlab_script(args):
             else
                 title('Quantile contours for mean dose volume histogram');
             end
-            xlabel('Dose');
-            ylabel('Volume ratio');
+            if length(doseUnit) == 0
+                xlabel('Dose');
+            else
+                xlabel(sprintf('Dose [%s]', doseUnit));
+            end
+            if length(volumeUnit) == 0
+                ylabel('Volume ratio');
+            else
+                ylabel(sprintf('Volume ratio [%s]', volumeUnit));
+            end
             print('-landscape', '-color', outfilename);
         end
         """)
@@ -229,9 +255,9 @@ class OrganInfo(object):
         self.idname = idname  # The ID string identifying the organ.
 
 
-def make_gnuplot_density_script(args, organinfos, xmin, xmax):
-    """make_gnuplot_density_script(object, list, float, float) ->
-                                                            (string, string)
+def make_gnuplot_density_script(args, organinfos, xmin, xmax, doseUnit, volumeUnit):
+    """make_gnuplot_density_script(object, list, float, float, string, string)
+                                                            -> (string, string)
 
     Prepares the gnuplot script for producing a mean dose volume histogram
     density plot. Teturns the tuple (name, ext), which is the name of the script
@@ -254,8 +280,8 @@ def make_gnuplot_density_script(args, organinfos, xmin, xmax):
 
         set style data lines
         set title "Mean dose volume histogram."
-        set xlabel "Dose [Gy(RBE)]"
-        set ylabel "Volume fraction [%]"
+        set xlabel "Dose@@DOSE_UNIT@@"
+        set ylabel "Volume fraction@@VOLUME_UNIT@@"
         set xrange [@@XMIN@@:@@XMAX@@]
         set yrange [0:100]
         set border linewidth 3
@@ -269,7 +295,9 @@ def make_gnuplot_density_script(args, organinfos, xmin, xmax):
         plot \\
         """.replace("@@BASENAME@@", basename).replace(
                     "@@XMIN@@", xmin).replace(
-                    "@@XMAX@@", xmax))
+                    "@@XMAX@@", xmax).replace(
+                    "@@DOSE_UNIT@@", doseUnit).replace(
+                    "@@VOLUME_UNIT@@", volumeUnit))
     color = ["#0000FF", "#00FF00", "#FF0000", "#00FFFF", "#FFFF00", "#FF00FF"]
     colorn = 0
     plotlines = []
@@ -290,8 +318,9 @@ def make_gnuplot_density_script(args, organinfos, xmin, xmax):
     return (filename, '.png')
 
 
-def make_gnuplot_line_script(args, organinfos, xmin, xmax):
-    """make_gnuplot_line_script(object, list, float, float) -> (string, string)
+def make_gnuplot_line_script(args, organinfos, xmin, xmax, doseUnit, volumeUnit):
+    """make_gnuplot_line_script(object, list, float, float, string, string)
+                                                            -> (string, string)
 
     Prepares the gnuplot script for producing an EPS line plot of the dose
     volume histogram. Returns the tuple (name, ext), which is the name of the
@@ -313,8 +342,8 @@ def make_gnuplot_line_script(args, organinfos, xmin, xmax):
 
         set style data lines
         set title "Mean dose volume histogram."
-        set xlabel "Dose [Gy(RBE)]"
-        set ylabel "Volume fraction [%]"
+        set xlabel "Dose@@DOSE_UNIT@@"
+        set ylabel "Volume fraction@@VOLUME_UNIT@@"
         set xrange [@@XMIN@@:@@XMAX@@]
         set yrange [0:100]
         set border linewidth 1
@@ -328,7 +357,9 @@ def make_gnuplot_line_script(args, organinfos, xmin, xmax):
         plot \\
         """.replace("@@BASENAME@@", basename).replace(
                     "@@XMIN@@", xmin).replace(
-                    "@@XMAX@@", xmax))
+                    "@@XMAX@@", xmax).replace(
+                    "@@DOSE_UNIT@@", doseUnit).replace(
+                    "@@VOLUME_UNIT@@", volumeUnit))
     color = ["#0000FF", "#00FF00", "#FF0000", "#00FFFF", "#FFFF00", "#FF00FF"]
     colorn = 0
     plotlines = []
@@ -347,16 +378,23 @@ def make_gnuplot_line_script(args, organinfos, xmin, xmax):
     return (filename, '.eps')
 
 
-def make_gnuplot_script(args, organinfos, xmin, xmax):
-    """make_gnuplot_script(object, list, float, float) -> (string, string)
+def make_gnuplot_script(args, organinfos, xmin, xmax, doseUnit, volumeUnit):
+    """make_gnuplot_script(object, list, float, float, string, string)
+                                                            -> (string, string)
 
     Produces a density plot if args.plotdensity is True and a line plot
     otherwise.
     """
+    if doseUnit != '':
+        doseUnit = " [{0}]".format(doseUnit)
+    if volumeUnit != '':
+        volumeUnit = " [{0}]".format(volumeUnit)
     if args.plotdensity:
-        return make_gnuplot_density_script(args, organinfos, xmin, xmax)
+        return make_gnuplot_density_script(args, organinfos, xmin, xmax,
+                                           doseUnit, volumeUnit)
     else:
-        return make_gnuplot_line_script(args, organinfos, xmin, xmax)
+        return make_gnuplot_line_script(args, organinfos, xmin, xmax,
+                                        doseUnit, volumeUnit)
 
 
 def run():
@@ -383,10 +421,13 @@ def run():
         raise RunError("Execution of command failed: {0}\nWrote the failing"
                        " script that to file '{1}'.".format(cmdstr, filename))
     if args.make_gnuplot:
-        # Parse the size out the data matrix.
+        # Parse the size of the data matrix, the units and the indices of the
+        # columns releated to each organ.
         pattern1 = re.compile(r'^(\S+)\s+(\S+)$')
         pattern2 = re.compile(r'^(\d+)\s+(\d+)\s+(.*)$')
         organinfos = []
+        doseUnit = '';
+        volumeUnit = '';
         for n, line in enumerate(out.splitlines()):
             match = None
             if n == 0:
@@ -394,6 +435,12 @@ def run():
                 if match is not None:
                     xmin = match.group(1)
                     xmax = match.group(2)
+            elif n == 1:
+                match = True
+                doseUnit = line.strip()
+            elif n == 2:
+                match = True
+                volumeUnit = line.strip()
             else:
                 match = pattern2.match(line)
                 if match is not None:
@@ -406,8 +453,8 @@ def run():
                 raise RunError("The output received from the octave command"
                                " does not appear to be valid:\n" + out)
         # Prepare the gnuplot script and execute it.
-        scriptname, created_file_ext = make_gnuplot_script(args, organinfos,
-                                                           xmin, xmax)
+        scriptname, created_file_ext = make_gnuplot_script(
+                            args, organinfos, xmin, xmax, doseUnit, volumeUnit)
         if subprocess.call(['gnuplot', scriptname]) != 0:
             raise RunError("Execution of gnuplot command failed.")
         basename, required_ext = os.path.splitext(args.outputfile)

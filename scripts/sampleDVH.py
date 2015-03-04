@@ -272,6 +272,14 @@ def run():
             organnames = fieldnames(dvhs{n});
             for m = 1:length(organnames)
                 organset.(organnames{m}) = 1;
+                if ~ exist('volumebinUnit')
+                    volumebinUnit = dvhs{n}.(organnames{m}).units{2};
+                else
+                    if ~ strcmp(volumebinUnit, dvhs{n}.(organnames{m}).units{2})
+                        warning('Found different units for the volume ratios in "%s" for "%s".',
+                                dvhfiles{n}, organnames{m});
+                    end
+                end
             end
         end
         if length(organs) == 0
@@ -298,13 +306,17 @@ def run():
             if find(volumebins ~= Samples.volumebins)
                 error('The volume bins vector in "%s" has different elements than the specified binning.', outfilename);
             end
+            if ~ strcmp(volumebinUnit, Samples.volumebinUnit)
+                error('The volume bins vector in "%s" has different elements than the specified binning.', outfilename);
+            end
             """)
     else:
         script += textwrap.dedent("""\
             if ~ exist('volumebins')
                 volumebins = 0:0.1:1;
             end
-            Samples = struct('doses', struct(), 'volumebins', volumebins);
+            Samples = struct('doses', struct(), 'doseUnits', struct(),
+                             'volumebins', volumebins, 'volumebinUnit', volumebinUnit);
             """)
     # Add the function call to generate/merge samples and save to file.
     script += textwrap.dedent("""\
@@ -312,9 +324,17 @@ def run():
             organ = organs{n};
             dvh_subset = {};
             k = 1;
+            doseUnit = 'Gy';
             for m = 1:length(dvhs)
                 if isfield(dvhs{m}, organ)
                     dvh_subset{k} = dvhs{m}.(organ);
+                    doseUnit = dvh_subset{k}.units{1};
+                    if isfield(Samples.doseUnits, organ)
+                        if ~ strcmp(dvh_subset{k}.units{1}, Samples.doseUnits.(organ))
+                            warning('The dose unit "%s" in "%s" for "%s" has a different value than the existing "%s".',
+                                    dvh_subset{k}.units{1}, dvhfiles{m}, organ, Samples.doseUnits.(organ));
+                        end
+                    end
                     k += 1;
                 end
             end
@@ -327,6 +347,7 @@ def run():
                 Samples.doses.(organ) = [Samples.doses.(organ); S];
             else
                 Samples.doses.(organ) = S;
+                Samples.doseUnits.(organ) = doseUnit;
             end
         end
         save('-7', outfilename, 'Samples');

@@ -52,7 +52,7 @@ function result = calcOEDmulti(filename, organ, integration_method, integration_
 %
 %               Name in file          Name to map to
 organnames = {
-                'BODY',               'Body',
+                'BODY',               'Body';
 
   };
 
@@ -80,8 +80,6 @@ for n = 1:length(organtable)
 end
 organmap = struct(organmap{:});
 
-organnamemap = struct(organnames{:});
-
 
 % Load the data from file.
 if ~ exist('filename')
@@ -107,8 +105,11 @@ one_organ_found = 0;
 for n = 1:length(organs)
   s = organs{n};
   % Try map the name to a standard one.
-  if isfield(organnamemap, s.structName)
-    s.structName = getfield(organnamemap, s.structName);
+  for m = 1:size(organnames, 1);
+    if strcmp(s.structName, organnames{m,1})
+      s.structName = organnames{m,2};
+      break;
+    end
   end
   if exist('organ')
     if ~ strcmp(organ, s.structName)
@@ -220,7 +221,7 @@ for n = 1:length(organs)
 end
 
 if one_organ_found == 0
-  printf('No organs found.');
+  printf('No organs found.\n');
 end
 
 result = struct(doseResults{:});

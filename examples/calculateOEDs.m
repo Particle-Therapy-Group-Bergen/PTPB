@@ -52,12 +52,16 @@ function result = calculateOEDs(filename, organ, integration_method, integration
 %
 %               Name in file          Name to map to
 organnames = {
-                'BODY',               'Body',
-                'Cribriform plate',   'CribriformPlate',
-                'CribiformPlate',     'CribriformPlate',
-                'Rectum_P_MT',        'Rectum',
-                'Bladder_P',          'Bladder',
+                'BODY',               'Body';
+                'Cribriform plate',   'CribriformPlate';
+                'CribiformPlate',     'CribriformPlate';
+                'Rectum_P_MT',        'Rectum';
+                'Bladder_P',          'Bladder';
   };
+
+% The following boolean flag indicates if the neutron dose reponse should be applied.
+% Valid values are 1 (True) or 0 (False).
+apply_neutron_correction = 0;
 
 % The following table maps different parameters to use for different model calculations.
 %
@@ -86,8 +90,6 @@ for n = 1:length(organtable)
 end
 organmap = struct(organmap{:});
 
-organnamemap = struct(organnames{:});
-
 
 % Load the data from file.
 if ~ exist('filename')
@@ -113,8 +115,11 @@ one_organ_found = 0;
 for n = 1:length(organs)
   s = organs{n};
   % Try map the name to a standard one.
-  if isfield(organnamemap, s.structName)
-    s.structName = getfield(organnamemap, s.structName);
+  for m = 1:size(organnames, 1);
+    if strcmp(s.structName, organnames{m,1})
+      s.structName = organnames{m,2};
+      break;
+    end
   end
   if exist('organ')
     if ~ strcmp(organ, s.structName)
@@ -175,6 +180,13 @@ for n = 1:length(organs)
   end
   datapoints = [s.dose; s.ratioToTotalVolume];
 
+  if apply_neutron_correction
+    dvh = struct('datapoints', datapoints', 'range_low', [1 1],
+                 'range_high', [1 1], 'units', {{'unknown', 'unknown'}});
+    newdvh = applyNeutronCorrection(dvh, s.structName);
+    datapoints = newdvh.datapoints';
+  end
+
   % Here we perform the calculations and fill in the results. We try both linear
   % and pchip interpolation methods and vary the tolerance to get and estimate of
   % the numerical uncertainty.
@@ -221,7 +233,7 @@ for n = 1:length(organs)
 end
 
 if one_organ_found == 0
-  printf('No organs found.');
+  printf('No organs found.\n');
 end
 
 result = struct(doseResults{:});

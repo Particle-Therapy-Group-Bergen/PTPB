@@ -141,7 +141,7 @@ for n = 1:length(organ_names)
         models{k} = model;
         stats{k} = estimateStats(data.(organ).(model), qlow, qhigh);
         if make_hists
-            hist(stats{k}, bins);
+            hist(data.(organ).(model), bins);
             title(sprintf('Uncertainty distribution for %s, patient %d, %s, %s',
                           strrep(field, '_', '\_'), patient,
                           strrep(organ, '_', '\_'), strrep(model, '_', '\_')));
@@ -178,7 +178,7 @@ for n = 1:length(organ_names)
         end
         stats{k} = estimateStats(samples, qlow, qhigh);
         if make_hists
-            hist(stats{k}, bins);
+            hist(samples, bins);
             title(sprintf('Uncertainty distribution for %s, %s, %s',
                           strrep(field, '_', '\_'), strrep(organ, '_', '\_'),
                           strrep(model, '_', '\_')));

@@ -79,8 +79,22 @@ doseHigh = dvh.range_high(:,1);
 volume = dvh.datapoints(:,2);
 volumeLow = dvh.range_low(:,2);
 volumeHigh = dvh.range_high(:,2);
-dose_samples = sampleDistribution(dvh.dose_binning_uncertainty_model, N, doseLow', doseHigh');
-volume_samples = sampleDistribution(dvh.volume_ratio_uncertainty_model, N, volumeLow', volumeHigh');
+switch dvh.dose_binning_uncertainty_model
+    case 'triangle'
+        dose_samples = sampleDistribution(dvh.dose_binning_uncertainty_model, N, doseLow', dose', doseHigh');
+    case 'triangle95'
+        dose_samples = sampleDistribution(dvh.dose_binning_uncertainty_model, N, doseLow', dose', doseHigh');
+    otherwise
+        dose_samples = sampleDistribution(dvh.dose_binning_uncertainty_model, N, doseLow', doseHigh');
+end
+switch dvh.volume_ratio_uncertainty_model
+    case 'triangle'
+        volume_samples = sampleDistribution(dvh.volume_ratio_uncertainty_model, N, volumeLow', volume', volumeHigh');
+    case 'triangle95'
+        volume_samples = sampleDistribution(dvh.volume_ratio_uncertainty_model, N, volumeLow', volume', volumeHigh');
+    otherwise
+        volume_samples = sampleDistribution(dvh.volume_ratio_uncertainty_model, N, volumeLow', volumeHigh');
+end
 
 % Sample the response model parameters N times.
 if length(varargin) > 0

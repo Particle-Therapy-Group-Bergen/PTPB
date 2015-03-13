@@ -96,7 +96,7 @@ class TwoValueRange(UncertaintyModel):
 
     def as_matlab(self):
         paramstr = "{{" + str(self.low) + ", " + str(self.high) + "}}"
-        return "struct('uncertainty_model', '{1}', 'params', {2})".format(
+        return "struct('uncertainty_model', '{0}', 'params', {1})".format(
                     self.get_name(), paramstr)
 
 
@@ -384,7 +384,7 @@ class LogNorm95(UncertaintyModel):
 class OrganParams(object):
     """Object of model parameters for a particular organ."""
 
-    registery = []
+    registry = []
 
     def __init__(self, name, **kwargs):
         for key in kwargs:
@@ -399,7 +399,46 @@ class OrganParams(object):
                     raise SyntaxError(msg)
         self.name = name
         self.models = kwargs
-        OrganParams.registery.append(self)
+        OrganParams.registry.append(self)
+
+
+# The following indicates valid strings for male and female identifiers.
+_male_ids = ['M', 'm', 'Male', 'male']
+_female_ids = ['F', 'f', 'Female', 'Female']
+
+
+class LarParams(object):
+    """
+    This object contains parameters for Lifetime Attributable Risks (LARs).
+    """
+
+    registry = []
+
+    def __init__(self, organ, gender, ages):
+        if not isinstance(organ, str):
+            raise SyntaxError("The organ parameter must be a string.")
+        self.organ = organ
+        if not isinstance(gender, str):
+            raise SyntaxError("The gender parameter must be a string.")
+        if gender in _male_ids:
+            gender = 'Male'
+        elif gender in _female_ids:
+            gender = 'Female'
+        else:
+            raise SyntaxError("Got an invalid gender '{0}'".format(gender))
+        self.gender = gender
+        if not isinstance(ages, dict):
+            raise SyntaxError("The ages parameter must be a dictionary.")
+        for key in ages.keys():
+            if not isinstance(key, float) and not isinstance(key, int):
+                msg = "The keys of the ages dictionary must be numbers."
+                raise SyntaxError(msg)
+            if not isinstance(ages[key], UncertaintyModel):
+                msg = "The value for ages['{0}'] must be an uncertainty model" \
+                      " object.".format(key)
+                raise SyntaxError(msg)
+        self.ages = ages
+        LarParams.registry.append(self)
 
 
 class ConfigParams(object):
@@ -411,7 +450,8 @@ class ConfigParams(object):
     def __init__(self, integration_methods, interpolation_methods,
                  dose_binning_uncertainty, volume_ratio_uncertainty,
                  bootstrap_max_samples, bootstrap_sample_mode,
-                 organ_name_map, organ_params, organs, models):
+                 organ_name_map, organ_params, organs, models,
+                 patient_params, lar_params):
         self.integration_methods = integration_methods
         self.interpolation_methods = interpolation_methods
         self.dose_binning_uncertainty = dose_binning_uncertainty
@@ -426,35 +466,81 @@ class ConfigParams(object):
                 self.organ_parameters[organ.name][model] = params
         self.organs = organs
         self.models = models
+        self.patient_params = []
+        for record in patient_params:
+            if record[1] in _male_ids:
+                gender = 'Male'
+            elif record[1] in _female_ids:
+                gender = 'Female'
+            else:
+                msg = "Got an invalid gender '{0}'".format(record[1])
+                raise SyntaxError(msg)
+            self.patient_params.append((record[0], gender, record[2]))
+        default_dict = lambda: collections.defaultdict(dict)
+        self.lar_params = collections.defaultdict(default_dict)
+        for larobj in lar_params:
+            self.lar_params[larobj.organ][larobj.gender].update(larobj.ages)
 
     def __repr__(self):
         # Find the maximum length of organ name strings.
-        max_organ_keys_size = max(map(len, self.organ_parameters.keys()))
+        max_organ_keys_size = max(map(len, self.organ_parameters.keys()) + [5])
         # Find the maximum length of model name strings.
         model_keys = []
         for organ in self.organ_parameters:
             model_keys += self.organ_parameters[organ].keys()
-        max_model_key_size = max(map(len, model_keys))
+        max_model_key_size = max(map(len, model_keys) + [5])
         # Prepare the header for the organs/models list.
         organ_output = "{0:>{w1}}  {1:>{w2}}          {2}\n".format(
                         "Organ", "Model", "Parameters",
                         w1 = max_organ_keys_size, w2 = max_model_key_size)
         # Construct the table of organs/models and their parameters.
+        anything_added = False
         for organ in self.organ_parameters:
             for model in self.organ_parameters[organ]:
                 params = self.organ_parameters[organ][model]
                 if len(params) > 0:
                     pattern = "{0:>{w1}}  {1:>{w2}}  {2:>5}:  {3}\n"
                     for n, param in enumerate(params):
+                        anything_added = True
                         organ_output += pattern.format(
                             organ if n == 0 else "", model if n == 0 else "",
                             n+1, param, w1 = max_organ_keys_size,
                             w2 = max_model_key_size)
                 else:
                     pattern = "{0:>{w1}}  {1:>{w2}}          (none)\n"
+                    anything_added = True
                     organ_output += pattern.format(
                         organ, model, n, w1 = max_organ_keys_size,
                         w2 = max_model_key_size)
+        if not anything_added:
+            organ_output += "(nothing)\n"
+        # Construct the table of patient parameters.
+        filelen = lambda x: len(x[0])
+        max_patient_col_size = max(map(filelen, self.patient_params) + [7])
+        patient_output = "{0:>{w1}}  {1:>6}  {2}\n".format("Patient", "Gender",
+                                            "Age", w1 = max_patient_col_size)
+        anything_added = False
+        for record in self.patient_params:
+            anything_added = True
+            patient_output += "{0:>{w1}}  {1:>6}  {2}\n".format(
+                    record[0], record[1], record[2], w1 = max_patient_col_size)
+        if not anything_added:
+            patient_output += "(nothing)\n"
+        # Construct LAR table.
+        max_organ_col_size = max(map(len, self.lar_params.keys()) + [5])
+        lar_output = "{0:>{w1}}  {1:>6}  {2:>12}  {3}\n".format("Organ",
+                                "Gender", "Age", "LAR", w1 = max_organ_col_size)
+        anything_added = False
+        for organ in self.lar_params.keys():
+            for gender in self.lar_params[organ]:
+                ages = self.lar_params[organ][gender]
+                for n, age in enumerate(sorted(ages)):
+                    anything_added = True
+                    lar_output += "{0:>{w1}}  {1:>6}  {2:>12}  {3}\n".format(
+                            organ if n == 0 else "", gender if n == 0 else "",
+                            age, ages[age], w1 = max_organ_col_size)
+        if not anything_added:
+            lar_output += "(nothing)\n"
         # Construct and return the full string representation:
         return "organs = {0}\n" \
                "models = {1}\n" \
@@ -464,12 +550,13 @@ class ConfigParams(object):
                "volume_ratio_uncertainty = {5}\n" \
                "bootstrap_max_samples = {6}\n" \
                "bootstrap_sample_mode = {7}\n" \
-               "organ_name_map = {8}\n{9}".format(
+               "organ_name_map = {8}\n{9}\n{10}\n{11}".format(
                    self.organs, self.models, self.integration_methods,
                    self.interpolation_methods, self.dose_binning_uncertainty,
                    self.volume_ratio_uncertainty, self.bootstrap_max_samples,
                    self.bootstrap_sample_mode, self.organ_name_map,
-                   organ_output.rstrip())
+                   organ_output.rstrip(), patient_output.rstrip(),
+                   lar_output.rstrip())
 
     def generate_matlab_params(self):
         """generate_matlab_params() -> string
@@ -516,6 +603,25 @@ class ConfigParams(object):
                     paramstr += "}"
                     script += "_organ_params.{0}.{1} = {2};\n".format(
                                                         organ, model, paramstr)
+        # Prepare the cell array of patient parameters.
+        if self.patient_params:
+            for n, record in enumerate(self.patient_params):
+                script += "_patient_params{" + str(n+1) + "} = " + \
+                          "struct('filename', '{0}', 'gender', '{1}'," \
+                          " 'age', {2});\n".format(*record)
+        # Prepare the LAR parameters.
+        if self.lar_params:
+            script += "_lar_params = struct;\n"
+            for organ in self.lar_params.keys():
+                for gender in self.lar_params[organ]:
+                    par_name = "_lar_params." + organ + "." + gender
+                    script += par_name + " = {};\n"
+                    ages = self.lar_params[organ][gender]
+                    for n, age in enumerate(sorted(ages)):
+                        script += par_name + "{" + str(n+1) + "}{1} = " + \
+                                    str(age) + ";\n"
+                        script += par_name + "{" + str(n+1) + "}{2} = " + \
+                                    ages[age].as_matlab() + ";\n"
         # Assemble the params structure code.
         if self.dose_binning_uncertainty or self.volume_ratio_uncertainty \
            or self.integration_methods or self.interpolation_methods \
@@ -548,6 +654,10 @@ class ConfigParams(object):
                                                     self.bootstrap_sample_mode)
         if self.organ_parameters:
             script += "params.organs = _organ_params;\n"
+        if self.patient_params:
+            script += "params.patients = _patient_params;\n"
+        if self.lar_params:
+            script += "params.lars = _lar_params;\n"
         return script
 
 
@@ -597,7 +707,8 @@ def load_config(filename, organlist, modellist):
                  'Box': Box, 'Box95': Box95, 'Triangle': Triangle,
                  'Triangle95': Triangle95, 'Triangle95mode': Triangle95mode,
                  'Gaus': Gaus, 'Gaus95': Gaus95, 'LogNorm': LogNorm,
-                 'LogNorm95': LogNorm95, 'OrganParams': OrganParams}
+                 'LogNorm95': LogNorm95, 'OrganParams': OrganParams,
+                 'LarParams': LarParams}
     try:
         execfile(filename, variables)
         integration_methods = variables['integration_methods']
@@ -654,6 +765,40 @@ def load_config(filename, organlist, modellist):
         if not isinstance(bootstrap_sample_mode, str):
             raise RunError("'bootstrap_sample_mode' in the configuration file"
                            " '{0}' must be a string.".format(filename))
+        if 'patient_params' in variables:
+            patient_params = variables['patient_params']
+        else:
+            patient_params = []
+        if not isinstance(patient_params, list):
+            raise RunError("'patient_params' in the configuration file '{0}'"
+                           " must be a list of tuples.".format(filename))
+        for tup in patient_params:
+            if not isinstance(tup, tuple):
+                msg = "'patient_params' in the configuration file '{0}'" \
+                      " must be a list of tuples.".format(filename)
+                raise RunError(msg)
+            if len(tup) != 3:
+                msg = "The tuple '{0}' for 'patient_params' in the" \
+                      " configuration file '{0}' must have 3 elements:" \
+                      " (<filename>, <gender>, <age>).".format(tup, filename)
+                raise RunError(msg)
+            if not isinstance(tup[0], str):
+                msg = "The first item in '{0}' for 'patient_params' in the" \
+                      " configuration file '{0}' must be a string file" \
+                      " name.".format(tup, filename)
+                raise RunError(msg)
+            valid_values = _male_ids + _female_ids
+            if not isinstance(tup[1], str) and tup[1] not in valid_values:
+                msg = "The second item in '{0}' for 'patient_params' in the" \
+                      " configuration file '{0}' must be a string indicating" \
+                      " the gender M/F or Male/Female.".format(tup, filename)
+                raise RunError(msg)
+            if not isinstance(tup[2], int) and not isinstance(tup[2], float):
+                msg = "The third item in '{0}' for 'patient_params' in the" \
+                      " configuration file '{0}' must be an integer or" \
+                      " floating point number indicating the" \
+                      " age.".format(tup, filename)
+                raise RunError(msg)
     except IOError as e:
         raise RunError(str(e))
     except KeyError as e:
@@ -666,7 +811,8 @@ def load_config(filename, organlist, modellist):
     return ConfigParams(integration_methods, interpolation_methods,
                         dose_binning_uncertainty, volume_ratio_uncertainty,
                         bootstrap_max_samples, bootstrap_sample_mode,
-                        organ_name_map, OrganParams.registery, organs, models)
+                        organ_name_map, OrganParams.registry, organs, models,
+                        patient_params, LarParams.registry)
 
 
 def run():

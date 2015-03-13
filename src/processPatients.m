@@ -97,9 +97,11 @@ models_found = struct;
 
 % Perform calculations such as computing OEDs per input file (i.e. per patient DVH).
 result = struct;
+lar_results = {};
 for n = 1:length(dvhfiles)
     filename = dvhfiles{n};
     result.OED_per_patient{n} = struct('filename', filename);
+    lar_results{n} = findGenderAndAge(filename, params);
     dvhs = getDoseVolumeHistogram(filename, organ_name_map, params, organs{:});
     organ_names = fieldnames(dvhs);
     if length(organs) > 0
@@ -132,8 +134,38 @@ for n = 1:length(dvhfiles)
             result.OED_per_patient{n}.organs.(organ).(model) = oeds;
             organs_found.(organ) = 1;
             models_found.(model) = 1;
+            % Check if we have LAR parameters for the given organ, model and gender
+            if length(lar_results{n}.gender) == 0
+                continue;
+            end
+            gender = lar_results{n}.gender;
+            if isnan(lar_results{n}.age)
+                continue;
+            end
+            age = lar_results{n}.age;
+            if ~ isfield(params.lars, organ)
+                continue
+            end
+            if ~ isfield(params.lars.(organ), gender)
+                continue
+            end
+            lar_params = params.lars.(organ).(gender);
+            lars = sampleLAR(oeds, age, interpolationMethods, lar_params{:});
+            lar_results{n}.organs.(organ).(model) = lars;
         end
     end
+end
+
+% Check if anything was acutally found for LARs, before adding them.
+lars_produced = 0;
+for n = 1:length(lar_results)
+    if isfield(lar_results{n}, 'organs')
+        lars_produced = 1;
+        break;
+    end
+end
+if lars_produced
+    result.LAR_per_patient = lar_results;
 end
 
 max_samples = params.bootstrap_max_samples;
@@ -172,6 +204,36 @@ for n = 1:length(organ_names)
     end
 end
 
+return;
+
+
+function result = findGenderAndAge(filename, params)
+% Tries to find the gender and age values from the parameters structure.
+% If the they cannot be found then return NaN and the empty string for
+% age and gender respectively.
+gender = '';
+age = NaN;
+if isfield(params, 'patients')
+    for n = 1:length(params.patients)
+        p = params.patients{n};
+        if endswith(filename, p.filename) || endswith(p.filename, filename)
+            gender = p.gender;
+            age = p.age;
+        end
+    end
+end
+result = struct('filename', filename, 'gender', gender, 'age', age);
+return;
+
+
+function result = endswith(str, suffix)
+% Return true if the string ends with the specified suffix.
+n = length(suffix);
+if length(str) < n
+    result = false;
+else
+    result = strcmp(str(end-n+1:end), suffix);
+end
 return;
 
 

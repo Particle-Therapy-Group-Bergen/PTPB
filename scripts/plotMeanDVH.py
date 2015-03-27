@@ -63,7 +63,7 @@ def prepare_argument_parser():
         help = """The quantiles binning vector. Must be in Matlab colon notation
             for ranges or vector declaration syntax.""")
     argparser.add_argument("-e", "--extra-curves", dest = "num_extra_curves",
-        default = 0, action = SetUnique, type = int,
+        metavar = "<number>", default = 0, action = SetUnique, type = int,
         help = """Indicates the number of extra linearly interpolated curves to
             draw between each pair of quantile curves. The default is zero.""")
     argparser.add_argument("-B", "--bins", dest = "bins",

@@ -403,6 +403,14 @@ def run():
     Parse the command line arguments and then process the files with DVH
     samples.
     """
+
+    def _call_command(*args, **kwargs):
+        try:
+            return subprocess.call(*args, **kwargs)
+        except IOError as err:
+            msg = "Failed to run '{0}': {1}".format(" ".join(args[0]), err)
+            raise RunError(msg)
+
     argparser = prepare_argument_parser()
     args = argparser.parse_args()
     if args.num_extra_curves < 0:
@@ -455,19 +463,22 @@ def run():
         # Prepare the gnuplot script and execute it.
         scriptname, created_file_ext = make_gnuplot_script(
                             args, organinfos, xmin, xmax, doseUnit, volumeUnit)
-        if subprocess.call(['gnuplot', scriptname]) != 0:
-            raise RunError("Execution of gnuplot command failed.")
+        try:
+            if _call_command(['gnuplot', scriptname]) != 0:
+                raise RunError("Execution of gnuplot command failed.")
+        except IOError as e:
+            raise RunError("Failed to run 'gnuplot': {0}".format(e))
         basename, required_ext = os.path.splitext(args.outputfile)
         gpout_filename = basename + created_file_ext
         # Add white background if requested.
         if args.plotdensity and args.makewhitebkg:
-            if subprocess.call(['convert', gpout_filename, '-background',
-                                'white', '-flatten', gpout_filename]) != 0:
+            if _call_command(['convert', gpout_filename, '-background',
+                              'white', '-flatten', gpout_filename]) != 0:
                 raise RunError("Execution of convert command failed.")
         # Convert to the output file format if not just a PNG is required.
         if created_file_ext != required_ext:
-            if subprocess.call(['convert', '-density', '600', gpout_filename,
-                                args.outputfile]) != 0:
+            if _call_command(['convert', '-density', '600', gpout_filename,
+                              args.outputfile]) != 0:
                 raise RunError("Execution of convert command failed.")
 
 

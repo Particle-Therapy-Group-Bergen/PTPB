@@ -407,8 +407,8 @@ def run():
     def _call_command(*args, **kwargs):
         try:
             return subprocess.call(*args, **kwargs)
-        except IOError as err:
-            msg = "Failed to run '{0}': {1}".format(" ".join(args[0]), err)
+        except OSError as err:
+            msg = "Failed to run '{0}': {1}".format(args[0][0], err)
             raise RunError(msg)
 
     argparser = prepare_argument_parser()
@@ -419,7 +419,11 @@ def run():
     # Invoke octave to execute the Matlab script.
     command_less_script = ['octave', '-q', '--path', '@@MFILE_PATH@@', '--eval']
     command = command_less_script + [script]
-    proc = subprocess.Popen(command, stdout = subprocess.PIPE)
+    try:
+        proc = subprocess.Popen(command, stdout = subprocess.PIPE)
+    except OSError as err:
+        msg = "Failed to run '{0}': {1}".format(command[0], err)
+        raise RunError(msg)
     out, err = proc.communicate()
     if proc.returncode != 0:
         cmdstr = " ".join(command_less_script + ["'...'"])

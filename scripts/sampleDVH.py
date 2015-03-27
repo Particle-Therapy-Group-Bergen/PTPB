@@ -236,6 +236,14 @@ def run():
 
     Parse the command line arguments and then process the patient DVH files.
     """
+
+    def _call_command(*args, **kwargs):
+        try:
+            return subprocess.call(*args, **kwargs)
+        except OSError as err:
+            msg = "Failed to run '{0}': {1}".format(args[0][0], err)
+            raise RunError(msg)
+
     argparser = prepare_argument_parser()
     args = argparser.parse_args()
     # Load the configuration file and print it if so requested.
@@ -355,7 +363,7 @@ def run():
     # Invoke octave to execute the Matlab script.
     command_less_script = ['octave', '-q', '--path', '@@MFILE_PATH@@', '--eval']
     command = command_less_script + [script]
-    if subprocess.call(command) != 0:
+    if _call_command(command) != 0:
         cmdstr = " ".join(command_less_script + ["'...'"])
         filename = "failed_script.m"
         with open(filename, "w") as scriptfile:

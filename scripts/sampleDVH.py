@@ -78,8 +78,9 @@ class ConfigParams(object):
         needed for the sampleDVH.m function.
         """
         script = ""
-        if self.volume_bins:
-            script += "volumebins = {0};\n".format(self.volume_bins)
+        if self.volume_bins is not None:
+            line = " ".join((str(self.volume_bins)).splitlines())
+            script += "volumebins = {0};\n".format(line)
         # Prepare the organ_name_map variable.
         func = lambda x: "'{0}', '{1}'".format(x, self.organ_name_map[x])
         liststr = "; ".join(map(func, self.organ_name_map))
@@ -213,7 +214,7 @@ def load_config(filename, organlist):
                            " must be a dictionary.".format(filename))
         if 'organs' in variables:
             organs = variables['organs']
-            if not isinstance(organ, list):
+            if not isinstance(organs, list):
                 raise RunError("'organs' in the configuration file '{0}' must"
                                " be a list of strings.".format(filename))
         else:

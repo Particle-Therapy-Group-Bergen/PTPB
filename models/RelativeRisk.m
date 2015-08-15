@@ -36,9 +36,9 @@ function factor = RelativeRisk(options, responseModel, doseCumulative1, doseCumu
 % doseCumulative1 and doseCumulative1 are the cumulative dose distribution data
 % points as a function of dose (dose on x-axis).
 %
-% Extra parameters passed to OED will be passed onto the integrand functions.
+% Extra parameters passed to RelativeRisk will be passed onto the integrand functions.
 % For example, to pass the organ specific alpha and beta parameters for the
-% 'LinearQuad' method, call OED as follows:
+% 'LinearQuad' method, call RelativeRisk as follows:
 %   y = RelativeRisk('LinExp', dataPoints, alpha);
 %
 % The output is the integrated relative risk factor.

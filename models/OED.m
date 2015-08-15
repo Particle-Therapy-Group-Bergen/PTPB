@@ -1,9 +1,19 @@
-function dose = OED(responseModel, doseCumulative, varargin)
-%dose = OED(responseModel, doseCumulative, ...)
-%dose = OED(responseModel, doseCumulative, options, ...)
+function dose = OED(model, dvh, varargin)
+%dose = OED(model, dvh, ...)
+%dose = OED(model, dvh, opts, ...)
+%dose = OED('LNT', dvh)
+%dose = OED('LNT', dvh, opts)
+%dose = OED('PlateauHall', dvh, threshold)
+%dose = OED('PlateauHall', dvh, opts, threshold)
+%dose = OED('LinExp', dvh, alpha)
+%dose = OED('LinExp', dvh, opts, alpha)
+%dose = OED('Competition', dvh, alpha1, beta1, alpha2, beta2, n)
+%dose = OED('Competition', dvh, opts, alpha1, beta1, alpha2, beta2, n)
+%dose = OED('LinPlat', dvh, delta)
+%dose = OED('LinPlat', dvh, opts, delta)
 %
-% Calculates the Organ Equivalent Dose (OED) from the cumulative dose distribution data points.
-% i.e the following integration is performed:
+% Calculates the Organ Equivalent Dose (OED) from the cumulative dose volume
+% histogram data points. i.e the following integration is performed:
 %
 %          1
 %         /
@@ -11,27 +21,24 @@ function dose = OED(responseModel, doseCumulative, varargin)
 %        /
 %        0
 %
-% Where R is the dose response model and D is the dose as a function of volume fraction.
-% D(v) is calculated by interpolating the cumulative dose distribution data points
-% and flipping the axes, since the data points have dose along the x-axis and volume
-% along the y-axis.
+% Where R is the dose response model and D is the dose as a function of volume
+% fraction. D(v) is calculated by interpolating the cumulative dose volume
+% histogram data points and flipping the axes, since the data points have dose
+% along the x-axis and volume along the y-axis.
 %
 %Parameters:
-% responseModel can be either 'LNT', 'PlateauHall', 'LinExp', 'Competition' or 'LinPlat'.
+% model - is the response model name and can be any of: 'LNT', 'PlateauHall',
+% 'LinExp', 'Competition' or 'LinPlat'.
 %
-% doseCumulative are the cumulative dose distribution data points as a function of dose (dose on x-axis).
+% dvh - are the cumulative dose volume histogram data points as a function of
+% dose (dose on x-axis).
 %
-% options is a structure of optional parameters to pass to the underlying integration and interpolation routines.
-% It should be created with the struct() function as follows (with default values indicated):
-%   options = struct('integration_method', 'quadv', 'tolerance', 1e-6, 'interpolation_method', 'pchip');
-% The option definitions are:
-%   'integration_method' - The integration method to use, can be one of 'quad', 'quadv', 'quadl', 'quadgk' or 'trapz'.
-%   'tolerance' - The error tolerance parameter to use for the integration.
-%   'interpolation_method' - The interpolation method to use for doseInterpolate.
+% opts - is a structure passed to the doseIntegrate function if given. Refer to
+% that function for more details.
 %
 % Extra parameters passed to OED will be passed onto the integrand functions.
-% For example, to pass the organ specific sterilisation parameter alpha to the LinExp function,
-% call OED as follows: y = OED('LinExp', dataPoints, alpha);
+% For example, to pass the organ specific sterilisation parameter alpha to the
+% LinExp function, call OED as follows: y = OED('LinExp', dataPoints, alpha);
 %
 % The output is the integrated OED dose.
 %
@@ -39,8 +46,8 @@ function dose = OED(responseModel, doseCumulative, varargin)
 % xp = 0:0.1:50;
 % yp = (1+erf(10-xp))/2;
 % data = [xp; yp];
-% plateau_threshold = 35;
-% dose = OED('PlateauHall', data, struct('integration_method', 'trapz'), plateau_threshold);
+% threshold = 35;
+% dose = OED('PlateauHall', data, struct('integration_method', 'trapz'), threshold);
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -73,112 +80,49 @@ if nargin == 0
     return;
 end
 
-% Unpack the options if there are any. Otherwise the defaults are used.
-integrationMethod = 'quadv';
-tolerance = 1e-6;
-interpMethod = 'pchip';
-if length(varargin) > 0 && isstruct(varargin{1})
-    integrandParams = varargin(2:length(varargin));
-    opts = varargin{1};
-    if isfield(opts, 'integration_method')
-        integrationMethod = opts.integration_method;
-    end
-    if isfield(opts, 'tolerance')
-        tolerance = opts.tolerance;
-    end
-    if isfield(opts, 'interpolation_method')
-        interpMethod = opts.interpolation_method;
-    end
-else
-    integrandParams = varargin;
-end
-
-% Select the integrand function based on the response model.
-switch responseModel
+% Select the integrand function based on the response model and integrate.
+switch model
     case 'LNT'
-        integrand = @(x) LNT(x, doseCumulative, interpMethod);
+        dose = doseIntegrate(@LNT, dvh, varargin{:});
     case 'PlateauHall'
-        integrand = @(x) PlateauHall(x, doseCumulative, interpMethod, integrandParams{:});
+        dose = doseIntegrate(@PlateauHall, dvh, varargin{:});
     case 'LinExp'
-        integrand = @(x) LinExp(x, doseCumulative, interpMethod, integrandParams{:});
+        dose = doseIntegrate(@LinExp, dvh, varargin{:});
     case 'Competition'
-        integrand = @(x) Competition(x, doseCumulative, interpMethod, integrandParams{:});
+        dose = doseIntegrate(@Competition, dvh, varargin{:});
     case 'LinPlat'
-        integrand = @(x) LinPlat(x, doseCumulative, interpMethod, integrandParams{:});
+        dose = doseIntegrate(@LinPlat, dvh, varargin{:});
     otherwise
-        error('Unknown response model type "%s".', responseModel);
-end
-
-% Select the integration function based on the integration method.
-switch integrationMethod
-    case 'quad'
-        integrate = @(f, a, b) quad(f, a, b, tolerance);
-    case 'quadv'
-        integrate = @(f, a, b) quadv(f, a, b, tolerance);
-    case 'quadl'
-        integrate = @(f, a, b) quadl(f, a, b, tolerance);
-    case 'quadgk'
-        integrate = @(f, a, b) quadgk(f, a, b, tolerance);
-    case 'trapz'
-        integrate = @(f, a, b) trapzIntegrate(f, a, b, tolerance);
-    otherwise
-        error('Unsupported integration method "%s".', integrationMethod);
-end
-
-dose = integrate(integrand, 0, 1);
-return;
-
-
-function y = trapzIntegrate(f, a, b, tol)
-% Simple integration method using the trapz function.
-
-h = abs(b-a)*tol*2;  % <= initial step size
-x = a:h:b;
-oldy = trapz(x, f(x));
-% Halve the step size and calculate again:
-h = h/2;
-x = a:h:b;
-y = trapz(x, f(x));
-% While the difference (estimate of error) is greater than the tolerance
-% threshold, keep halving the step size and calculate again.
-while abs(y - oldy) > tol
-    oldy = y;
-    h = h/2;
-    x = a:h:b;
-    y = trapz(x, f(x));
+        error('Unknown response model type "%s".', model);
 end
 return;
 
 
-function y = LNT(x, doseCumulative, interpMethod)
-y = doseInterpolate(x, doseCumulative, interpMethod);
+function y = LNT(d)
+y = d;
 return;
 
 
-function y = PlateauHall(x, doseCumulative, interpMethod, threshold)
+function y = PlateauHall(d, threshold)
 % Check for optional threshold parameter, otherwise set it to 4 Gy.
 if ~ exist('threshold')
     threshold = 4.5;
 end
-d = doseInterpolate(x, doseCumulative, interpMethod);
 y = d .* (d < threshold) + threshold .* (d >= threshold);
 return;
 
 
-function y = LinExp(x, doseCumulative, interpMethod, alpha)
-d = doseInterpolate(x, doseCumulative, interpMethod);
+function y = LinExp(d, alpha)
 y = d.*exp(-alpha.*d);
 return;
 
 
-function y = Competition(x, doseCumulative, interpMethod, alpha1, beta1, alpha2, beta2, n)
+function y = Competition(d, alpha1, beta1, alpha2, beta2, n)
 % n is the number of dose fractions.
-d = doseInterpolate(x, doseCumulative, interpMethod);
 y = (d + beta1./alpha1.*d.^2./n).*exp(-(alpha2.*d + beta2.*d.^2./n));
 return;
 
 
-function y = LinPlat(x, doseCumulative, interpMethod, delta)
-d = doseInterpolate(x, doseCumulative, interpMethod);
+function y = LinPlat(d, delta)
 y = ((1-exp(-delta.*d))./delta);
 return;

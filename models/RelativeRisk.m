@@ -1,5 +1,8 @@
-function factor = RelativeRisk(options, responseModel, doseCumulative1, doseCumulative2, varargin)
-%factor = RelativeRisk(options, responseModel, doseCumulative1, doseCumulative2, ...)
+function factor = RelativeRisk(model, dvh1, dvh2, varargin)
+%factor = RelativeRisk(model, dvh1, dvh2, ...)
+%factor = RelativeRisk(model, dvh1, dvh2, opts, ...)
+%factor = RelativeRisk('LinearQuad', dvh1, dvh2, n1, n2, alpha, beta, RBEmin, RBEmax)
+%factor = RelativeRisk('LinearQuad', dvh1, dvh2, opts, n1, n2, alpha, beta, RBEmin, RBEmax)
 %
 % Calculates the Relative Risk (RR) from the cumulative dose distribution data points.
 % i.e the following integration is performed:
@@ -19,27 +22,16 @@ function factor = RelativeRisk(options, responseModel, doseCumulative1, doseCumu
 % dose along the x-axis and volume along the y-axis.
 %
 %Parameters:
-% options is a structure with the following parameters that are passed to the
-% underlying integration and interpolation routines. It should be created with
-% the struct() function as follows (with default values indicated):
-%   options = struct('integration_method', 'quadv',
-%                    'integration_tolerance', 1e-6,
-%                    'interpolation_method', 'pchip');
-% The structure can be empty. The option definitions are as follows:
-%   'integration_method' - The integration method to use, can be one of 'quad',
-%                          'quadv', 'quadl', 'quadgk' or 'trapz'.
-%   'integration_tolerance' - The error tolerance parameter to use for the integration.
-%   'interpolation_method' - The interpolation method to use for doseInterpolate.
+% model - is the response model and can be any of: 'LinearQuad'
 %
-% responseModel can be any of: 'LinearQuad'
+% dvh1 and dvh2 are the cumulative dose distribution data points as a function
+% of dose (dose on x-axis).
 %
-% doseCumulative1 and doseCumulative1 are the cumulative dose distribution data
-% points as a function of dose (dose on x-axis).
+% opts - is a structure passed to the doseIntegrate function if given. Refer to
+% that function for more details.
 %
-% Extra parameters passed to RelativeRisk will be passed onto the integrand functions.
-% For example, to pass the organ specific alpha and beta parameters for the
-% 'LinearQuad' method, call RelativeRisk as follows:
-%   y = RelativeRisk('LinExp', dataPoints, alpha);
+% Extra parameters passed to RelativeRisk will be passed onto the integrand
+% functions R1 and R2. The order and meaning depends on the value of 'model'.
 %
 % The output is the integrated relative risk factor.
 %
@@ -51,16 +43,12 @@ function factor = RelativeRisk(options, responseModel, doseCumulative1, doseCumu
 % yp = (1+erf(7-xp*0.5))/2;
 % data2 = [xp; yp];
 % n1 = 5;
-% alpha1 = 0.5;
-% beta1 = 2;
 % n2 = 11;
-% alpha2 = 0.6;
-% beta2 = 3;
+% alpha = 0.6;
+% beta = 3;
 % RBEmin = 2;
 % RBEmax = 7;
-% factor = RelativeRisk(struct('integration_method', 'trapz'), 'LinearQuad',
-%                       data1, data2, n1, alpha1, beta1, n2, alpha2, beta2,
-%                       RBEmin, RBEmax);
+% factor = RelativeRisk('LinearQuad', data1, data2, n1, n2, alpha, beta, RBEmin, RBEmax);
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -93,90 +81,38 @@ if nargin == 0
     return;
 end
 
-% Unpack the options if there are any. Otherwise the defaults are used.
-integrationMethod = 'trapz';
-tolerance = 1e-6;
-interpMethod = 'pchip';
-if length(options) ~= 0
-    if isstruct(options)
-        if isfield(options, 'integration_method')
-            integrationMethod = options.integration_method;
-        end
-        if isfield(options, 'integration_tolerance')
-            tolerance = options.integration_tolerance;
-        end
-        if isfield(options, 'interpolation_method')
-            interpMethod = options.interpolation_method;
-        end
-    else
-        error('The options field must be a structure.');
-    end
+if length(varargin) > 0 && isstruct(varargin{1})
+    opts = varargin{1};
+    params = varargin(2:length(varargin));
+else
+    params = varargin;
+    opts = struct();
 end
 
 % Select the integrand function based on the response model.
-switch responseModel
+switch model
     case 'LinearQuad'
-        n1 = varargin{1};
-        alpha1 = varargin{2};
-        beta1 = varargin{3};
-        n2 = varargin{4};
-        alpha2 = varargin{5};
-        beta2 = varargin{6};
-        RBEmin = varargin{7};
-        RBEmax = varargin{8};
-        integrand1 = @(x) LinearQuad(x, interpMethod, doseCumulative1,
-                                     n1, alpha1, beta1);
-        integrand2 = @(x) LinearQuad(x, interpMethod, doseCumulative2,
-                                     n2, RBEmax .* alpha2, RBEmin.^2 .* beta2);
+        n1 = params{1};
+        n2 = params{2};
+        alpha = params{3};
+        beta = params{4};
+        RBEmin = params{5};
+        RBEmax = params{6};
+        integrand1 = @(x) LinearQuad(x, n1, alpha, beta);
+        integrand2 = @(x) LinearQuad(x, n2, RBEmax .* alpha, RBEmin.^2 .* beta);
     otherwise
-        error('Unknown response model type "%s".', responseModel);
+        error('Unknown response model type "%s".', model);
 end
 
-% Select the integration function based on the integration method.
-switch integrationMethod
-    case 'quad'
-        integrate = @(f, a, b) quad(f, a, b, tolerance);
-    case 'quadv'
-        integrate = @(f, a, b) quadv(f, a, b, tolerance);
-    case 'quadl'
-        integrate = @(f, a, b) quadl(f, a, b, tolerance);
-    case 'quadgk'
-        integrate = @(f, a, b) quadgk(f, a, b, tolerance);
-    case 'trapz'
-        integrate = @(f, a, b) trapzIntegrate(f, a, b, tolerance);
-    otherwise
-        error('Unsupported integration method "%s".', integrationMethod);
-end
-
-factor = integrate(integrand1, 0, 1) / integrate(integrand2, 0, 1);
+r1 = doseIntegrate(integrand1, dvh1, opts);
+r2 = doseIntegrate(integrand2, dvh2, opts);
+factor = r1 ./ r2;
 return;
 
 
-function y = trapzIntegrate(f, a, b, tol)
-% Simple integration method using the trapz function.
-
-h = abs(b-a)*tol*2;  % <= initial step size
-x = a:h:b;
-oldy = trapz(x, f(x));
-% Halve the step size and calculate again:
-h = h/2;
-x = a:h:b;
-y = trapz(x, f(x));
-% While the difference (estimate of error) is greater than the tolerance
-% threshold, keep halving the step size and calculate again.
-while abs(y - oldy) > tol
-    oldy = y;
-    h = h/2;
-    x = a:h:b;
-    y = trapz(x, f(x));
-end
-return;
-
-
-function y = LinearQuad(x, interpMethod, doseCumulative, n, alpha, beta)
+function y = LinearQuad(d, n, alpha, beta)
 % Linear quadratic form:
 %   (alpha * D + beta * D^2 / n) * exp( - (alpha * D + beta * D^2 / n) )
-d = doseInterpolate(x, doseCumulative, interpMethod);
 k = alpha .* d + beta .* d.^2 ./ n;
 y = k .* exp(-k);
 return;

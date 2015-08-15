@@ -1,21 +1,23 @@
-%data = readDVHfile(filename)
+%result = functionName(x, y)
 %
-%Reads in a standard DVH output text file given by the filename and returns the
-%contents in the header and structures cell array.
+% Description of function...
 %
-%data - this contains a structure of the parsed DVH file. It will contain two
-%       fields, 'header' and 'structures', structured as follows:
-%  header - this contains a Matlab struct of field values that form the global
-%           header of the DVH file.
-%  structures - this is a cell array of Matlab structs that each contain fields
-%               relevant to a biological structure (organ).
+%Parameters:
+% x - description of x ...
+% y - description of y ...
+%
+%Returns calculated value in result ...
+%
+%Example:
+% show example ...
+%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Particle Therapy Project Bergen (PTPB) - tools and models for research in
 %    cancer therapy using particle beams.
 %
-%    Copyright (C) 2013 Particle Therapy Group Bergen
+%    Copyright (C) 2015 Particle Therapy Group Bergen
 %
 %    This program is free software: you can redistribute it and/or modify
 %    it under the terms of the GNU General Public License as published by

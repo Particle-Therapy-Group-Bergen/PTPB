@@ -113,6 +113,8 @@ return;
 function y = LinearQuad(d, n, alpha, beta)
 % Linear quadratic form:
 %   (alpha * D + beta * D^2 / n) * exp( - (alpha * D + beta * D^2 / n) )
+% where D is dose, n is the number of fractionations, alpha and beta are the
+% radio-sensitivity parameters.
 k = alpha .* d + beta .* d.^2 ./ n;
 y = k .* exp(-k);
 return;

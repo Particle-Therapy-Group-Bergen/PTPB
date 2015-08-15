@@ -67,7 +67,7 @@ legend('1 fraction', '6 fractions', '11 fractions', '16 fractions', '21 fraction
 return;
 
 
-function risk = RR(dose, N, alpha, beta, RBEmin, RBEmax, ProtonRBE)
+function risk = RR(dose, N, alpha, beta, RBEmin, RBEmax, scalingRBE)
 
 % Prepare a function to produce simulated DVH data as a step function.
 simdvh = @(d) [0, 1; d, 1; d, 0; 2*d, 0];
@@ -79,7 +79,7 @@ risk = [];
 for n = 1:length(dose)
     d = dose(n);
     dvh1 = simdvh(N*d);
-    dvh2 = simdvh(N*d/ProtonRBE);
+    dvh2 = simdvh(N*d/scalingRBE);
     risk(n) = RelativeRisk('LinearQuad', dvh1, dvh2, opts, N, N, alpha, beta,
                            RBEmin, RBEmax);
 end

@@ -2,7 +2,7 @@ function result = calcVolumeFractions(filename, organ, intervals, interpolation_
 %result = calcVolumeFractions(filename, organ [, intervals, interpolation_method, organ_name_map])
 %
 % This is an example script to show how to calculate the volume fractions receiving
-% a doses in a certain range.
+% doses in a certain range.
 %
 % filename - This must be a string with the name of a file that contains the DVH data.
 %            The file must have been converted with convertDVHtoMatlabFile.sh.

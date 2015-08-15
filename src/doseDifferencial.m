@@ -1,7 +1,7 @@
 function dVdD = doseDifferencial(dose, doseCumulative, interpMethod, tolerance)
 %dVdD = doseDifferencial(dose, doseCumulative [, interpMethod, tolerance])
 %
-% Calculates the differencial of the cumulative dose volume histogram that must
+% Calculates the differencial of the cumulative dose volume histogram, which must
 % be loaded from file with the getDoseVolumeHistogram() function.
 %
 %Where,

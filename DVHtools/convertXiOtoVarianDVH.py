@@ -100,6 +100,12 @@ def Convert(infile, outfile):
         else:
             print("WARNING: unexpected line in " + str(infile.name) + ":" \
                   + str(lineno) + ": " + str(line), file=sys.stderr)
+    # Make sure we add the last organ in the file when we reach the end of the file.
+    if state == 'data_section' and organ is not None and resolution is not None \
+       and bins is not None:
+        elem = {'organ': organ, 'resolution': resolution, 'bins': bins,
+                'datarows': datarows}
+        data.append(elem)
     # Generate output:
     if patient_name is None or patient_id is None or date is None:
         raise Exception("Error: Could not find patient name, ID or date fields in "\

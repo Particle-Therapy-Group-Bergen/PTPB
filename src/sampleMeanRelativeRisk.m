@@ -95,10 +95,15 @@ if ~ exist('RBEmax_distrib')
 end
 
 % Integration and interpolation options.
+% Note, we want 1 randomised bootstrap sampling for each single input DVH
+% ampling by default. Thus, bootstrap_samples = 1:
 if ~ exist('opts')
     opts = struct('integration_method', 'trapz',
                   'integration_tolerance', 1e-5,
-                  'interpolation_method', 'linear');
+                  'interpolation_method', 'linear',
+                  'sample_dvh', 1,
+                  'bootstrap_samples', 1,
+                  'bootstrap_method', 'random');
 end
 
 % Organ name remapping:
@@ -122,25 +127,45 @@ for k = 1:length(patients)
     dvh2list{k} = dvh2;
 end
 
-% Prepare the sampling ranges for the DVHs.
-params1 = {};
-params2 = {};
-for k = 1:length(patients)
-    [low, high] = getDVHBinRanges(dvh1list{k});
-    params1{k} = struct('type', 'box', 'params', {{low, high}});
-    [low, high] = getDVHBinRanges(dvh2list{k});
-    params2{k} = struct('type', 'box', 'params', {{low, high}});
+if isfield(opts, 'bootstrap_samples')
+    bootstrap_samples = opts.bootstrap_samples;
+else
+    bootstrap_samples = 1;
 end
-dvh1_distrib = struct('type', 'array', 'params', {params1});
-dvh2_distrib = struct('type', 'array', 'params', {params2});
+if isfield(opts, 'bootstrap_method')
+    bootstrap_method = opts.bootstrap_method;
+else
+    bootstrap_method = 'random';
+end
 
+if isfield(opts, 'sample_dvh') && opts.sample_dvh
+    % Prepare the sampling ranges for the DVHs.
+    params1 = {};
+    params2 = {};
+    for k = 1:length(patients)
+        [low, high] = getDVHBinRanges(dvh1list{k});
+        params1{k} = struct('type', 'box', 'params', {{low, high}});
+        [low, high] = getDVHBinRanges(dvh2list{k});
+        params2{k} = struct('type', 'box', 'params', {{low, high}});
+    end
+    dvh1_distrib = struct('type', 'array', 'params', {params1});
+    dvh2_distrib = struct('type', 'array', 'params', {params2});
 
-func = @(dvh1list, dvh2list, alpha, beta, RBEmin, RBEmax) CalculateMeanRR(dvh1list,
-                            dvh2list, opts, n1, n2, alpha, beta, RBEmin, RBEmax);
+    func = @(dvh1list, dvh2list, alpha, beta, RBEmin, RBEmax) CalculateMeanRR(
+                dvh1list, dvh2list, opts, n1, n2, alpha, beta, RBEmin, RBEmax,
+                bootstrap_samples, bootstrap_method);
 
-samples = sampleFunction(func, Nsamples, dvh1_distrib, dvh2_distrib,
-                         alpha_distrib, beta_distrib, RBEmin_distrib,
-                         RBEmax_distrib);
+    samples = sampleFunction(func, Nsamples, dvh1_distrib, dvh2_distrib,
+                             alpha_distrib, beta_distrib, RBEmin_distrib,
+                             RBEmax_distrib);
+else
+    func = @(alpha, beta, RBEmin, RBEmax) CalculateMeanRR(dvh1list, dvh2list,
+                                    opts, n1, n2, alpha, beta, RBEmin, RBEmax,
+                                    bootstrap_samples, bootstrap_method);
+
+    samples = sampleFunction(func, Nsamples, alpha_distrib, beta_distrib,
+                             RBEmin_distrib, RBEmax_distrib);
+end
 result = cell2mat(samples);
 return;
 
@@ -177,7 +202,7 @@ return;
 
 
 function result = CalculateMeanRR(dvh1list, dvh2list, opts, n1, n2, alpha, beta,
-                                  RBEmin, RBEmax)
+                            RBEmin, RBEmax, bootstrap_samples, bootstrap_method)
 rr = zeros(length(dvh1list), 1);
 for k = 1:length(rr)
     % We have to make sure we tie the distribution end points to 1 and 0 for
@@ -189,12 +214,15 @@ for k = 1:length(rr)
     rr(k) = RelativeRisk('LinearQuad', dvh1, dvh2, opts, n1, n2, alpha, beta,
                          RBEmin, RBEmax);
 end
-% We want 1 randomised bootstrap sampling for each single input DVH sampling.
-% Thus, the max_samples = 1 setting:
-S = bootStrap(rr, 1, 'random')';
-result = [mean(S), alpha, beta, RBEmin, RBEmax];
+S = bootStrap(rr, bootstrap_samples, bootstrap_method)';
+M = mean(S)';
+A = repmat(alpha, length(M), 1);
+B = repmat(beta, length(M), 1);
+Rl = repmat(RBEmin, length(M), 1);
+Rh = repmat(RBEmax, length(M), 1);
+result = [M, A, B, Rl, Rh];
 fprintf(stdout,
-        'relative risk = %g\talpha = %g\tbeta = %g\tRBEmin = %g\tRBEmax = %g\n',
-        result(1), result(2), result(3), result(4), result(5));
+        '#%d\trelative risk = %g\talpha = %g\tbeta = %g\tRBEmin = %g\tRBEmax = %g\n',
+        length(M), result(1,1), result(1,2), result(1,3), result(1,4), result(1,5));
 fflush(stdout);
 return;

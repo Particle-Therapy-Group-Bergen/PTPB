@@ -30,9 +30,11 @@ ifeq ($(PREFIX_DIR),)
 PREFIX_DIR=~/bin
 endif
 
-MATLAB_FILES=$(shell find . -type f -name "*.m" | grep -v template)
-SCRIPT_FILES=$(shell find . -type f -name "*.sh") \
-             $(shell find . -type f -name "*.py" | grep -v _config.py)
+INSTALL_PATHS = DVHtools models scripts src
+
+MATLAB_FILES=$(shell find $(INSTALL_PATHS) -type f -name "*.m")
+SCRIPT_FILES=$(shell find $(INSTALL_PATHS) -type f -name "*.sh") \
+             $(shell find $(INSTALL_PATHS) -type f -name "*.py")
 
 all:
 

@@ -1,11 +1,11 @@
 function result = sampleMeanRelativeRisk(Nsamples, filepat1, filepat2, patients,
                                          organ, n1, n2, scale1, scale2,
                                          alpha_distrib, beta_distrib,
-                                         RBEmin_distrib, RBEmax_disrib,
+                                         RBEmin_distrib, RBEmax_distrib,
                                          opts, namemap)
 %function result = sampleMeanRelativeRisk(Nsamples, filepat1, filepat2,
 %  patients, organ, n1, n2, scale1, scale2, alpha_distrib, beta_distrib,
-%  RBEmin_distrib, RBEmax_disrib, opts, namemap)
+%  RBEmin_distrib, RBEmax_distrib, opts, namemap)
 %
 % Calculates sample points from the mean relative risk distribution, given
 % patient input files, fractionation, scaling factors, alpha, beta and RBE

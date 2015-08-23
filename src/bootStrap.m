@@ -83,7 +83,7 @@ return;
 function samples = randomResample(data, M)
 % Perform random resampling of the data vector to produce M new resampled vectors.
 N = length(data);
-samples = [];
+samples = zeros(M, N);
 for m = 1:M
   samples(m,:) = data( round(rand(1, N) * N + 0.5) );
 end

@@ -30,12 +30,15 @@ OUTPUT_FILES = hypercube_cion_bladder.mat \
 
 OCTAVE = octave -q --path ~/bin/PTPB_mfiles
 
-.PHONY: all clean
+.PHONY: all clean cleanall
 
 all: $(OUTPUT_FILES)
 
 clean:
-	rm -rf make_hypercube $(OUTPUT_FILES) $(foreach N,$(OUTPUT_FILES),log_$(N).txt)
+	rm -rf $(foreach N,$(OUTPUT_FILES),log_$(N).txt)
+
+cleanall: clean
+	rm -rf make_hypercube $(OUTPUT_FILES)
 
 
 hypercube_cion_bladder.mat: make_hypercube

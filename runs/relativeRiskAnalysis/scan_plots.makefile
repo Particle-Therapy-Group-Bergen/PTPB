@@ -41,12 +41,15 @@ OUTPUT_FILES = $(foreach N,$(FILEIDS),$(subst FILEID,cion_bladder_$(N),$(FILETYP
                $(foreach N,$(FILEIDS),$(subst FILEID,proton_bladder_$(N),$(FILETYPES))) \
                $(foreach N,$(FILEIDS),$(subst FILEID,proton_rectum_$(N),$(FILETYPES)))
 
-.PHONY: all clean
+.PHONY: all clean cleanall
 
 all: $(PLOT_FILES)
 
 clean:
 	rm -rf $(OUTPUT_FILES)
+
+cleanall: clean
+	rm -rf $(PLOT_FILES)
 
 %.eps: hypercube_%.mat makeScanPlot.sh 
 	./makeScanPlot.sh $*

@@ -22,9 +22,9 @@
 
 # Top level make file to produce all calculations and plots.
 
-OCTAVE="octave -q --path ~/bin/PTPB_mfiles"
+OCTAVE = octave -q --path ~/bin/PTPB_mfiles
 
-.PHONY: all clean
+.PHONY: all clean cleanall
 
 all:
 	$(MAKE) -f hypercubes.makefile OCTAVE="$(OCTAVE)"
@@ -33,3 +33,7 @@ all:
 clean:
 	$(MAKE) -f hypercubes.makefile clean
 	$(MAKE) -f scan_plots.makefile clean
+
+cleanall:
+	$(MAKE) -f hypercubes.makefile cleanall
+	$(MAKE) -f scan_plots.makefile cleanall

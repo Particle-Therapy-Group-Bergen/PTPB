@@ -51,5 +51,5 @@ clean:
 cleanall: clean
 	rm -rf $(PLOT_FILES)
 
-%.eps: hypercube_%.mat makeScanPlot.sh 
+%.eps: hypercube_%.mat makeScanPlot.sh makeContourLabels.py
 	./makeScanPlot.sh $*

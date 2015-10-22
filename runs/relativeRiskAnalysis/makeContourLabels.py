@@ -14,7 +14,7 @@ N = int(match.group(1))
 M = int(match.group(2))
 
 class Contour(object):
-    
+
     class DataPoint(object):
         def __init__(self, text, x, y, z):
             self.text = text
@@ -23,11 +23,11 @@ class Contour(object):
             self.z = z
         def __eq__(self, x):
             return self.text == x.text
-    
+
     def __init__(self, label):
         self.label = label
         self.points = []
-        
+
     def add_point(self, *args, **kwargs):
         self.points.append(Contour.DataPoint(*args, **kwargs))
 
@@ -90,11 +90,10 @@ for co in old_contours:
             continue
     if not merged:
         contours.append(co)
-            
 
 
 labelpoints = []
-k = 14
+k = 16
 
 low = False
 for c in contours:
@@ -104,23 +103,56 @@ for c in contours:
         m = int(float(len(c.points)) * 2./3.)
     else:
         m = int(len(c.points) / 3)
+    # The following is for adjusting individual contour labels.
+    # N indicates the plot column left to right 1 .. 4.
+    # M indicates the plot row top to bottom 1 .. 4.
+    # Here we adjust the distance along the curve m (in the range 0..1) to place
+    # the label.
     if c.points[0].z == "1.75":
         if N == 4 and M == 1:
             m = int(float(len(c.points)) * 2.0/5.)
-        elif N in [1, 2] and M == 2:
-            m = int(float(len(c.points)) * 1.0/8.)
+        elif N == 1 and M == 2:
+            m = int(float(len(c.points)) * 0.14)
+        elif N == 2 and M == 2:
+            m = int(float(len(c.points)) * 0.115)
+        elif N == 3 and M == 2:
+            m = int(float(len(c.points)) * 0.19)
+        elif N == 4 and M == 2:
+            m = int(float(len(c.points)) * 0.19)
         elif N == 1 and M == 3:
-            m = int(float(len(c.points)) * 1.2/8.)
+            m = int(float(len(c.points)) * 0.21)
         elif N == 2 and M == 3:
-            m = int(float(len(c.points)) * 1.05/8.)
+            m = int(float(len(c.points)) * 0.17)
         elif N in [3, 4] and M == 3:
-            m = int(float(len(c.points)) * 0.55)
+            m = int(float(len(c.points)) * 0.31)
+        elif N == 1 and M == 4:
+            m = int(float(len(c.points)) * 0.2)
+        elif N == 2 and M == 4:
+            m = int(float(len(c.points)) * 0.185)
+        elif N == 3 and M == 4:
+            m = int(float(len(c.points)) * 0.22)
         elif N == 4 and M == 4:
             m = int(float(len(c.points)) * 0.43)
         else:
             m = int(float(len(c.points)) * 1.5/8.)
+    if c.points[0].z == "1.5":
+        if M == 3:
+            m = int(float(len(c.points)) * 1./2.)
     if c.points[0].z == "2":
-        m = int(float(len(c.points)) * 1.75/8.)
+        if M == 4:
+            if N == 1:
+                m = int(float(len(c.points)) * 0.165)
+            elif N == 4:
+                m = int(float(len(c.points)) * 0.14)
+            else:
+                m = int(float(len(c.points)) * 0.15)
+        else:
+            if N in [1, 2]:
+                m = int(float(len(c.points)) * 1.75/8.)
+            elif N == 3:
+                m = int(float(len(c.points)) * 1.65/8.)
+            else:
+                m = int(float(len(c.points)) * 1.5/8.)
     x = float(c.points[m].x)
     y = float(c.points[m].y)
     if x < 0.03 or 0.775 < x or y < 0.013 or 0.049 < y:
@@ -130,7 +162,7 @@ for c in contours:
     for n in xrange(m-k,m+k):
         c.points[n].text = ""
     c.points = c.points[0:m-k] + [c.points[m]] + c.points[m+k:]
-    
+
 
 filename = sys.argv[2]
 with open(filename, 'w') as outfile:
@@ -142,4 +174,14 @@ with open(filename, 'w') as outfile:
 filename = sys.argv[3]
 with open(filename, 'w') as outfile:
     for p in labelpoints:
+        # Change label for the "1" contour to "1.0".
+        if '.' not in p.z and int(p.z) == 1:
+            p.text = "{0}  {1}  {2:.1f}".format(p.x, p.y, float(p.z))
+        # Ajust the middle position of some of the labels:
+        if p.z == "1.75" and M == 2 and N == 1:
+            p.text = "{0}  {1}  {2}".format(float(p.x) - 0.005, p.y, p.z)
+        if p.z == "1.75" and M == 2 and N == 2:
+            p.text = "{0}  {1}  {2}".format(float(p.x) - 0.0075, p.y, p.z)
+        if p.z == "1.75" and M == 2 and N in [3, 4]:
+            p.text = "{0}  {1}  {2}".format(float(p.x) - 0.01, p.y, p.z)
         outfile.write(p.text + "\n");

@@ -24,16 +24,100 @@
 
 OCTAVE = octave -q --path ~/bin/PTPB_mfiles
 
-.PHONY: all clean cleanall
+PATIENT_IDS = 12 33 35 36 37 39 41 42 43 44
 
-all:
+.PHONY: all clean cleanall data plots hypercubes clean-hypercubes \
+  cleanall-hypercubes scan-plots clean-scan-plots cleanall-scan-plots \
+  1d-samples clean-1d-samples cleanall-1d-samples 1d-scan-plots \
+  clean-1d-scan-plots cleanall-1d-scan-plots per-patient-samples \
+  clean-per-patient-samples cleanall-per-patient-samples samples \
+  clean-samples cleanall-samples
+
+
+all: data
+	@echo "Sampling is done. Now run with the 'plots' target to generate plots."
+
+data: hypercubes 1d-samples per-patient-samples samples
+
+plots: scan-plots 1d-scan-plots
+
+clean: clean-hypercubes clean-scan-plots clean-1d-samples clean-1d-scan-plots \
+  clean-per-patient-samples clean-samples
+
+cleanall: cleanall-hypercubes cleanall-scan-plots cleanall-1d-samples \
+  cleanall-1d-scan-plots cleanall-per-patient-samples cleanall-samples
+
+
+hypercubes:
 	$(MAKE) -f hypercubes.makefile OCTAVE="$(OCTAVE)"
+
+clean-hypercubes:
+	$(MAKE) -f hypercubes.makefile clean
+
+cleanall-hypercubes:
+	$(MAKE) -f hypercubes.makefile cleanall
+
+
+scan-plots:
 	$(MAKE) -f scan_plots.makefile OCTAVE="$(OCTAVE)"
 
-clean:
-	$(MAKE) -f hypercubes.makefile clean
+clean-scan-plots:
 	$(MAKE) -f scan_plots.makefile clean
 
-cleanall:
-	$(MAKE) -f hypercubes.makefile cleanall
+cleanall-scan-plots:
 	$(MAKE) -f scan_plots.makefile cleanall
+
+
+1d-samples:
+	$(MAKE) -f alpha_scan_samples.makefile OCTAVE="$(OCTAVE)"
+	$(MAKE) -f beta_scan_samples.makefile OCTAVE="$(OCTAVE)"
+	$(MAKE) -f RBEmax_scan_samples.makefile OCTAVE="$(OCTAVE)"
+	$(MAKE) -f RBEmin_scan_samples.makefile OCTAVE="$(OCTAVE)"
+
+clean-1d-samples:
+	$(MAKE) -f alpha_scan_samples.makefile clean
+	$(MAKE) -f beta_scan_samples.makefile clean
+	$(MAKE) -f RBEmax_scan_samples.makefile clean
+	$(MAKE) -f RBEmin_scan_samples.makefile clean
+
+cleanall-1d-samples:
+	$(MAKE) -f alpha_scan_samples.makefile cleanall
+	$(MAKE) -f beta_scan_samples.makefile cleanall
+	$(MAKE) -f RBEmax_scan_samples.makefile cleanall
+	$(MAKE) -f RBEmin_scan_samples.makefile cleanall
+
+
+1d-scan-plots:
+	$(MAKE) -f scan_1D_plots.makefile OCTAVE="$(OCTAVE)"
+
+clean-1d-scan-plots:
+	$(MAKE) -f scan_1D_plots.makefile clean
+
+cleanall-1d-scan-plots:
+	$(MAKE) -f scan_1D_plots.makefile cleanall
+
+
+per-patient-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_samples.makefile PATIENT="$$N" OCTAVE="$(OCTAVE)" ; \
+	done
+
+clean-per-patient-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_samples.makefile PATIENT="$$N" clean ; \
+	done
+
+cleanall-per-patient-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_samples.makefile PATIENT="$$N" cleanall ; \
+	done
+
+
+samples:
+	$(MAKE) -f samples.makefile OCTAVE="$(OCTAVE)"
+
+clean-samples:
+	$(MAKE) -f samples.makefile clean
+
+cleanall-samples:
+	$(MAKE) -f samples.makefile cleanall

@@ -117,7 +117,7 @@ RBEMAX_3=`get_rbe_max 1 3 "$HYPERCUBEFILE"`
 RBEMAX_4=`get_rbe_max 1 4 "$HYPERCUBEFILE"`
 
 gnuplot <<EOF
-set terminal postscript eps color enhanced dashed size 20cm,20cm
+set terminal postscript eps color enhanced dashed size 16cm,16cm
 set output "${TECH_ORGAN_NAME}.eps"
 
 set multiplot layout 4,4 columnsfirst downwards scale 1, 1
@@ -131,14 +131,14 @@ set yrange [0.01:0.05]
 set zrange [0.25:2.25]
 set cbrange [0.25:2.25]
 
-px1 = 0.07
+px1 = 0.085
 px5 = 0.965
 px2 = (px5 - px1) / 4 * 1 + px1
 px3 = (px5 - px1) / 4 * 2 + px1
 px4 = (px5 - px1) / 4 * 3 + px1
 
-py1 = 0.12
-py5 = 0.97
+py1 = 0.14
+py5 = 0.965
 py2 = (py5 - py1) / 4 * 1 + py1
 py3 = (py5 - py1) / 4 * 2 + py1
 py4 = (py5 - py1) / 4 * 3 + py1
@@ -317,8 +317,8 @@ splot "relative_risk_${TECH_ORGAN_NAME}_43.dat", \
     "contour_labels_${TECH_ORGAN_NAME}_43.dat" using 1:2:3:3 with labels
 
 cbwidth = px5 - px1
-set colorbox horizontal user origin px1,0.045 size cbwidth,0.013
-set cblabel "Relative Risk"
+set colorbox horizontal user origin px1,0.055 size cbwidth,0.013
+set cblabel "Relative Risk (VMAT/C-ion)"
 set xlabel xlabelvalue
 set format x
 set label 1 "RBE_{max} = $RBEMAX_4" at screen pRBElabelx, pRBElabely4 center rotate

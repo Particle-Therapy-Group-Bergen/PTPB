@@ -34,4 +34,4 @@ if [ ! \( -d data -o -L data \) ] ; then
     exit 1
 fi
 
-make -j "$CORE_COUNT" OCTAVE="$OCTAVE" $@
+exec make -j "$CORE_COUNT" OCTAVE="$OCTAVE" $@

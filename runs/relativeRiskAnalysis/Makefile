@@ -26,26 +26,47 @@ OCTAVE = octave -q --path ~/bin/PTPB_mfiles
 
 PATIENT_IDS = 12 33 35 36 37 39 41 42 43 44
 
-.PHONY: all clean cleanall data plots hypercubes clean-hypercubes \
-  cleanall-hypercubes scan-plots clean-scan-plots cleanall-scan-plots \
-  1d-samples clean-1d-samples cleanall-1d-samples 1d-scan-plots \
-  clean-1d-scan-plots cleanall-1d-scan-plots per-patient-samples \
-  clean-per-patient-samples cleanall-per-patient-samples samples \
-  clean-samples cleanall-samples
+.PHONY: all clean cleanall data plots \
+  hypercubes clean-hypercubes cleanall-hypercubes \
+  scan-plots clean-scan-plots cleanall-scan-plots \
+  1d-samples clean-1d-samples cleanall-1d-samples \
+  1d-scan-plots clean-1d-scan-plots cleanall-1d-scan-plots \
+  per-patient-samples \
+  clean-per-patient-samples \
+  cleanall-per-patient-samples \
+  per-patient-no-alpha-spread-samples \
+  clean-per-patient-no-alpha-spread-samples \
+  cleanall-per-patient-no-alpha-spread-samples \
+  per-patient-no-RBEmax-spread-samples \
+  clean-per-patient-no-RBEmax-spread-samples \
+  cleanall-per-patient-no-RBEmax-spread-samples \
+  per-patient-no-alpha-RBEmax-spread-samples \
+  clean-per-patient-no-alpha-RBEmax-spread-samples \
+  cleanall-per-patient-no-alpha-RBEmax-spread-samples \
+  samples clean-samples cleanall-samples
 
 
 all: data
 	@echo "Sampling is done. Now run with the 'plots' target to generate plots."
 
-data: hypercubes 1d-samples per-patient-samples samples
+data: hypercubes 1d-samples per-patient-samples samples \
+  per-patient-no-alpha-spread-samples per-patient-no-RBEmax-spread-samples \
+  per-patient-no-alpha-RBEmax-spread-samples
 
 plots: scan-plots 1d-scan-plots
 
 clean: clean-hypercubes clean-scan-plots clean-1d-samples clean-1d-scan-plots \
-  clean-per-patient-samples clean-samples
+  clean-per-patient-samples clean-per-patient-no-alpha-spread-samples \
+  clean-per-patient-no-RBEmax-spread-samples \
+  clean-per-patient-no-alpha-RBEmax-spread-samples \
+  clean-samples
 
 cleanall: cleanall-hypercubes cleanall-scan-plots cleanall-1d-samples \
-  cleanall-1d-scan-plots cleanall-per-patient-samples cleanall-samples
+  cleanall-1d-scan-plots cleanall-per-patient-samples \
+  cleanall-per-patient-no-alpha-spread-samples \
+  clean-per-patient-no-RBEmax-spread-samples \
+  clean-per-patient-no-alpha-RBEmax-spread-samples \
+  cleanall-samples
 
 
 hypercubes:
@@ -110,6 +131,54 @@ clean-per-patient-samples:
 cleanall-per-patient-samples:
 	for N in $(PATIENT_IDS) ; do \
 		$(MAKE) -f patient_samples.makefile PATIENT="$$N" cleanall ; \
+	done
+
+
+per-patient-no-alpha-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_alpha_spread_samples.makefile PATIENT="$$N" OCTAVE="$(OCTAVE)" ; \
+	done
+
+clean-per-patient-no-alpha-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_alpha_spread_samples.makefile PATIENT="$$N" clean ; \
+	done
+
+cleanall-per-patient-no-alpha-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_alpha_spread_samples.makefile PATIENT="$$N" cleanall ; \
+	done
+
+
+per-patient-no-RBEmax-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_RBEmax_spread_samples.makefile PATIENT="$$N" OCTAVE="$(OCTAVE)" ; \
+	done
+
+clean-per-patient-no-RBEmax-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_RBEmax_spread_samples.makefile PATIENT="$$N" clean ; \
+	done
+
+cleanall-per-patient-no-RBEmax-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_RBEmax_spread_samples.makefile PATIENT="$$N" cleanall ; \
+	done
+
+
+per-patient-no-alpha-RBEmax-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_alpha_RBEmax_spread_samples.makefile PATIENT="$$N" OCTAVE="$(OCTAVE)" ; \
+	done
+
+clean-per-patient-no-alpha-RBEmax-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_alpha_RBEmax_spread_samples.makefile PATIENT="$$N" clean ; \
+	done
+
+cleanall-per-patient-no-alpha-RBEmax-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_alpha_RBEmax_spread_samples.makefile PATIENT="$$N" cleanall ; \
 	done
 
 

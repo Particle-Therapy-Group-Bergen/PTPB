@@ -43,6 +43,9 @@ PATIENT_IDS = 12 33 35 36 37 39 41 42 43 44
   per-patient-no-alpha-RBEmax-spread-samples \
   clean-per-patient-no-alpha-RBEmax-spread-samples \
   cleanall-per-patient-no-alpha-RBEmax-spread-samples \
+  per-patient-no-alpha-beta-RBEmax-spread-samples \
+  clean-per-patient-no-alpha-beta-RBEmax-spread-samples \
+  cleanall-per-patient-no-alpha-beta-RBEmax-spread-samples \
   samples clean-samples cleanall-samples
 
 
@@ -51,7 +54,8 @@ all: data
 
 data: hypercubes 1d-samples per-patient-samples samples \
   per-patient-no-alpha-spread-samples per-patient-no-RBEmax-spread-samples \
-  per-patient-no-alpha-RBEmax-spread-samples
+  per-patient-no-alpha-RBEmax-spread-samples \
+  per-patient-no-alpha-beta-RBEmax-spread-samples
 
 plots: scan-plots 1d-scan-plots
 
@@ -59,13 +63,15 @@ clean: clean-hypercubes clean-scan-plots clean-1d-samples clean-1d-scan-plots \
   clean-per-patient-samples clean-per-patient-no-alpha-spread-samples \
   clean-per-patient-no-RBEmax-spread-samples \
   clean-per-patient-no-alpha-RBEmax-spread-samples \
+  clean-per-patient-no-alpha-beta-RBEmax-spread-samples \
   clean-samples
 
 cleanall: cleanall-hypercubes cleanall-scan-plots cleanall-1d-samples \
   cleanall-1d-scan-plots cleanall-per-patient-samples \
   cleanall-per-patient-no-alpha-spread-samples \
-  clean-per-patient-no-RBEmax-spread-samples \
-  clean-per-patient-no-alpha-RBEmax-spread-samples \
+  cleanall-per-patient-no-RBEmax-spread-samples \
+  cleanall-per-patient-no-alpha-RBEmax-spread-samples \
+  cleanall-per-patient-no-alpha-beta-RBEmax-spread-samples \
   cleanall-samples
 
 
@@ -179,6 +185,22 @@ clean-per-patient-no-alpha-RBEmax-spread-samples:
 cleanall-per-patient-no-alpha-RBEmax-spread-samples:
 	for N in $(PATIENT_IDS) ; do \
 		$(MAKE) -f patient_no_alpha_RBEmax_spread_samples.makefile PATIENT="$$N" cleanall ; \
+	done
+
+
+per-patient-no-alpha-beta-RBEmax-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_alpha_beta_RBEmax_spread_samples.makefile PATIENT="$$N" OCTAVE="$(OCTAVE)" ; \
+	done
+
+clean-per-patient-no-alpha-beta-RBEmax-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_alpha_beta_RBEmax_spread_samples.makefile PATIENT="$$N" clean ; \
+	done
+
+cleanall-per-patient-no-alpha-beta-RBEmax-spread-samples:
+	for N in $(PATIENT_IDS) ; do \
+		$(MAKE) -f patient_no_alpha_beta_RBEmax_spread_samples.makefile PATIENT="$$N" cleanall ; \
 	done
 
 

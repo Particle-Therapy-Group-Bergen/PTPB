@@ -49,7 +49,13 @@ PATIENT_IDS = 12 33 35 36 37 39 41 42 43 44
   per-patient-no-alpha-beta-RBE-spread-samples \
   clean-per-patient-no-alpha-beta-RBE-spread-samples \
   cleanall-per-patient-no-alpha-beta-RBE-spread-samples \
-  samples clean-samples cleanall-samples
+  samples clean-samples cleanall-samples \
+  samples-no-alpha clean-samples-no-alpha cleanall-samples-no-alpha \
+  samples-no-beta clean-samples-no-beta cleanall-samples-no-beta \
+  samples-no-RBEmin clean-samples-no-RBEmin cleanall-samples-no-RBEmin \
+  samples-no-RBEmax clean-samples-no-RBEmax cleanall-samples-no-RBEmax \
+  samples-no-bin-spread clean-samples-no-bin-spread cleanall-samples-no-bin-spread \
+  samples-no-spread clean-samples-no-spread cleanall-samples-no-spread
 
 
 all: data
@@ -57,12 +63,19 @@ all: data
 
 data: hypercubes \
   1d-samples \
-  per-patient-samples samples \
+  per-patient-samples \
   per-patient-no-alpha-spread-samples \
   per-patient-no-RBEmax-spread-samples \
   per-patient-no-alpha-RBEmax-spread-samples \
   per-patient-no-alpha-beta-RBEmax-spread-samples \
-  per-patient-no-alpha-beta-RBE-spread-samples
+  per-patient-no-alpha-beta-RBE-spread-samples \
+  samples \
+  samples-no-alpha \
+  samples-no-beta \
+  samples-no-RBEmin \
+  samples-no-RBEmax \
+  samples-no-bin-spread \
+  samples-no-spread
 
 plots: scan-plots 1d-scan-plots
 
@@ -76,7 +89,13 @@ clean: clean-hypercubes \
   clean-per-patient-no-alpha-RBEmax-spread-samples \
   clean-per-patient-no-alpha-beta-RBEmax-spread-samples \
   clean-per-patient-no-alpha-beta-RBE-spread-samples \
-  clean-samples
+  clean-samples \
+  clean-samples-no-alpha \
+  clean-samples-no-beta \
+  clean-samples-no-RBEmin \
+  clean-samples-no-RBEmax \
+  clean-samples-no-bin-spread \
+  clean-samples-no-spread
 
 cleanall: cleanall-hypercubes \
   cleanall-scan-plots \
@@ -88,7 +107,13 @@ cleanall: cleanall-hypercubes \
   cleanall-per-patient-no-alpha-RBEmax-spread-samples \
   cleanall-per-patient-no-alpha-beta-RBEmax-spread-samples \
   cleanall-per-patient-no-alpha-beta-RBE-spread-samples \
-  cleanall-samples
+  cleanall-samples \
+  cleanall-samples-no-alpha \
+  cleanall-samples-no-beta \
+  cleanall-samples-no-RBEmin \
+  cleanall-samples-no-RBEmax \
+  cleanall-samples-no-bin-spread \
+  cleanall-samples-no-spread
 
 
 hypercubes:
@@ -244,3 +269,63 @@ clean-samples:
 
 cleanall-samples:
 	$(MAKE) -f samples.makefile cleanall
+
+
+samples-no-alpha:
+	$(MAKE) -f samples_no_alpha.makefile OCTAVE="$(OCTAVE)"
+
+clean-samples-no-alpha:
+	$(MAKE) -f samples_no_alpha.makefile clean
+
+cleanall-samples-no-alpha:
+	$(MAKE) -f samples_no_alpha.makefile cleanall
+
+
+samples-no-beta:
+	$(MAKE) -f samples_no_beta.makefile OCTAVE="$(OCTAVE)"
+
+clean-samples-no-beta:
+	$(MAKE) -f samples_no_beta.makefile clean
+
+cleanall-samples-no-beta:
+	$(MAKE) -f samples_no_beta.makefile cleanall
+
+
+samples-no-RBEmin:
+	$(MAKE) -f samples_no_RBEmin.makefile OCTAVE="$(OCTAVE)"
+
+clean-samples-no-RBEmin:
+	$(MAKE) -f samples_no_RBEmin.makefile clean
+
+cleanall-samples-no-RBEmin:
+	$(MAKE) -f samples_no_RBEmin.makefile cleanall
+
+
+samples-no-RBEmax:
+	$(MAKE) -f samples_no_RBEmax.makefile OCTAVE="$(OCTAVE)"
+
+clean-samples-no-RBEmax:
+	$(MAKE) -f samples_no_RBEmax.makefile clean
+
+cleanall-samples-no-RBEmax:
+	$(MAKE) -f samples_no_RBEmax.makefile cleanall
+
+
+samples-no-bin-spread:
+	$(MAKE) -f samples_no_bin_spread.makefile OCTAVE="$(OCTAVE)"
+
+clean-samples-no-bin-spread:
+	$(MAKE) -f samples_no_bin_spread.makefile clean
+
+cleanall-samples-no-bin-spread:
+	$(MAKE) -f samples_no_bin_spread.makefile cleanall
+
+
+samples-no-spread:
+	$(MAKE) -f samples_no_spread.makefile OCTAVE="$(OCTAVE)"
+
+clean-samples-no-spread:
+	$(MAKE) -f samples_no_spread.makefile clean
+
+cleanall-samples-no-spread:
+	$(MAKE) -f samples_no_spread.makefile cleanall

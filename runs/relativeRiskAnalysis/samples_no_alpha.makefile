@@ -21,13 +21,10 @@
 ###############################################################################
 
 # This makefile will generate samples for nominal C-ion and Proton Relative
-# Risk values per patient.
+# Risk values.
 
 ITERATIONS = 100
 N_SAMPLES = 1000
-
-# Possible values: 12, 33, 35, 36, 37, 39, 41, 42, 43, 44
-PATIENT = 12
 
 ALPHA_CION_BLADDER_MEAN = 0.25
 ALPHA_CION_BLADDER_STD = 0.075
@@ -77,16 +74,16 @@ OCTAVE = octave -q --path ~/bin/PTPB_mfiles
 
 FILEIDS = $(shell N=1; while test $$N -le $(ITERATIONS); do echo $$N ; N=$$((N+1)) ; done)
 
-CION_BLADDER_FILELIST = $(foreach N,$(FILEIDS),patient_no_alpha_RBEmax_spread_$(PATIENT)_cion_bladder_samples_$(N).mat)
-CION_RECTUM_FILELIST = $(foreach N,$(FILEIDS),patient_no_alpha_RBEmax_spread_$(PATIENT)_cion_rectum_samples_$(N).mat)
-PROTON_BLADDER_FILELIST = $(foreach N,$(FILEIDS),patient_no_alpha_RBEmax_spread_$(PATIENT)_proton_bladder_samples_$(N).mat)
-PROTON_RECTUM_FILELIST = $(foreach N,$(FILEIDS),patient_no_alpha_RBEmax_spread_$(PATIENT)_proton_rectum_samples_$(N).mat)
+CION_BLADDER_FILELIST = $(foreach N,$(FILEIDS),cion_bladder_samples_no_alpha_$(N).mat)
+CION_RECTUM_FILELIST = $(foreach N,$(FILEIDS),cion_rectum_samples_no_alpha_$(N).mat)
+PROTON_BLADDER_FILELIST = $(foreach N,$(FILEIDS),proton_bladder_samples_no_alpha_$(N).mat)
+PROTON_RECTUM_FILELIST = $(foreach N,$(FILEIDS),proton_rectum_samples_no_alpha_$(N).mat)
 FILELIST = $(CION_BLADDER_FILELIST) $(CION_RECTUM_FILELIST) $(PROTON_BLADDER_FILELIST) $(PROTON_RECTUM_FILELIST)
 
-OUTPUT_FILES = patient_no_alpha_RBEmax_spread_$(PATIENT)_cion_bladder_sample_data.mat \
-               patient_no_alpha_RBEmax_spread_$(PATIENT)_cion_rectum_sample_data.mat \
-               patient_no_alpha_RBEmax_spread_$(PATIENT)_proton_bladder_sample_data.mat \
-               patient_no_alpha_RBEmax_spread_$(PATIENT)_proton_rectum_sample_data.mat
+OUTPUT_FILES = cion_bladder_sample_no_alpha_data.mat \
+               cion_rectum_sample_no_alpha_data.mat \
+               proton_bladder_sample_no_alpha_data.mat \
+               proton_rectum_sample_no_alpha_data.mat
 
 .PHONY: all clean
 
@@ -96,10 +93,10 @@ clean:
 	rm -rf $(FILELIST) $(foreach N,$(FILELIST),log_$(N).txt)
 
 cleanall: clean
-	rm -rf patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples $(OUTPUT_FILES)
+	rm -rf make_samples_no_alpha merge_samples_no_alpha $(OUTPUT_FILES)
 
 
-define patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples
+define merge_samples_no_alpha
 #!/bin/sh
 outfile="$$1"
 shift
@@ -122,18 +119,18 @@ end
 save('-v7', '$$outfile', 'Results');
 EOF
 endef
-export patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples
+export merge_samples_no_alpha
 
-patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples: patient_no_alpha_RBEmax_spread_samples.makefile
-	echo "$$patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples" > $@
+merge_samples_no_alpha: samples_no_alpha.makefile
+	echo "$$merge_samples_no_alpha" > $@
 	chmod +x $@
 
 
-define patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples
+define make_samples_no_alpha
 #!/bin/sh
 exec $(OCTAVE) <<EOF
 Nsamples = $$2;
-patients = [$(PATIENT)];
+patients = [12, 33, 35, 36, 37, 39, 41, 42, 43, 44];
 filepat1 = '$$3';
 n1 = $$4;
 scale1 = $$5;
@@ -144,12 +141,12 @@ organ = '$$9';
 alpha_distrib = struct('type', 'delta', 'params', {{$$10}});
 beta_distrib = struct('type', 'gaus', 'params', {{$$12, $$13}});
 RBEmin_distrib = struct('type', 'triangle', 'params', {{$$14, $$15, $$16}});
-RBEmax_distrib = struct('type', 'delta', 'params', {{$$18}});
+RBEmax_distrib = struct('type', 'triangle', 'params', {{$$17, $$18, $$19}});
 opts = struct('integration_method', 'trapz',
               'integration_tolerance', 1e-4,
               'interpolation_method', 'pchip',
               'sample_dvh', 1,
-              'bootstrap_samples', 1,
+              'bootstrap_samples', 10,
               'bootstrap_method', 'random');
 namemap = {
         'Bladder_P', 'Bladder';
@@ -161,15 +158,15 @@ Results = sampleMeanRelativeRisk(Nsamples, filepat1, filepat2, patients, organ,
 save('-v7', '$$1', 'Results');
 EOF
 endef
-export patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples
+export make_samples_no_alpha
 
-patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples: patient_no_alpha_RBEmax_spread_samples.makefile
-	echo "$$patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples" > $@
+make_samples_no_alpha: samples_no_alpha.makefile
+	echo "$$make_samples_no_alpha" > $@
 	chmod +x $@
 
 
-$(CION_BLADDER_FILELIST): patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples
-	./patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
+$(CION_BLADDER_FILELIST): make_samples_no_alpha
+	./make_samples_no_alpha $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
 		'data/CionDataPhysicalDose/HUH%dphysical_dvh.mat' 12 1 Bladder \
 		$(ALPHA_CION_BLADDER_MEAN) $(ALPHA_CION_BLADDER_STD) \
 		$(BETA_CION_BLADDER_MEAN) $(BETA_CION_BLADDER_STD) \
@@ -178,13 +175,13 @@ $(CION_BLADDER_FILELIST): patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples
 		> log_$@.txt 2>&1
 
 
-patient_no_alpha_RBEmax_spread_$(PATIENT)_cion_bladder_sample_data.mat: patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples $(CION_BLADDER_FILELIST)
-	./patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples $@ $(CION_BLADDER_FILELIST) && \
+cion_bladder_sample_no_alpha_data.mat: merge_samples_no_alpha $(CION_BLADDER_FILELIST)
+	./merge_samples_no_alpha $@ $(CION_BLADDER_FILELIST) && \
 		rm -f $@.backup $(CION_BLADDER_FILELIST) $(foreach N,$(CION_BLADDER_FILELIST),log_$(N).txt)
 
 
-$(CION_RECTUM_FILELIST): patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples
-	./patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
+$(CION_RECTUM_FILELIST): make_samples_no_alpha
+	./make_samples_no_alpha $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
 		'data/CionDataPhysicalDose/HUH%dphysical_dvh.mat' 12 1 Rectum \
 		$(ALPHA_CION_RECTUM_MEAN) $(ALPHA_CION_RECTUM_STD) \
 		$(BETA_CION_RECTUM_MEAN) $(BETA_CION_RECTUM_STD) \
@@ -193,13 +190,13 @@ $(CION_RECTUM_FILELIST): patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples
 		> log_$@.txt 2>&1
 
 
-patient_no_alpha_RBEmax_spread_$(PATIENT)_cion_rectum_sample_data.mat: patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples $(CION_RECTUM_FILELIST)
-	./patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples $@ $(CION_RECTUM_FILELIST) && \
+cion_rectum_sample_no_alpha_data.mat: merge_samples_no_alpha $(CION_RECTUM_FILELIST)
+	./merge_samples_no_alpha $@ $(CION_RECTUM_FILELIST) && \
 		rm -f $@.backup $(CION_RECTUM_FILELIST) $(foreach N,$(CION_RECTUM_FILELIST),log_$(N).txt)
 
 
-$(PROTON_BLADDER_FILELIST): patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples
-	./patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
+$(PROTON_BLADDER_FILELIST): make_samples_no_alpha
+	./make_samples_no_alpha $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
 		'data/IMPTdvh/impt%d.mat' 25 1 Bladder \
 		$(ALPHA_PROTON_BLADDER_MEAN) $(ALPHA_PROTON_BLADDER_STD) \
 		$(BETA_PROTON_BLADDER_MEAN) $(BETA_PROTON_BLADDER_STD) \
@@ -208,13 +205,13 @@ $(PROTON_BLADDER_FILELIST): patient_no_alpha_RBEmax_spread_$(PATIENT)_make_sampl
 		> log_$@.txt 2>&1
 
 
-patient_no_alpha_RBEmax_spread_$(PATIENT)_proton_bladder_sample_data.mat: patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples $(PROTON_BLADDER_FILELIST)
-	./patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples $@ $(PROTON_BLADDER_FILELIST) && \
+proton_bladder_sample_no_alpha_data.mat: merge_samples_no_alpha $(PROTON_BLADDER_FILELIST)
+	./merge_samples_no_alpha $@ $(PROTON_BLADDER_FILELIST) && \
 		rm -f $@.backup $(PROTON_BLADDER_FILELIST) $(foreach N,$(PROTON_BLADDER_FILELIST),log_$(N).txt)
 
 
-$(PROTON_RECTUM_FILELIST): patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples
-	./patient_no_alpha_RBEmax_spread_$(PATIENT)_make_samples $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
+$(PROTON_RECTUM_FILELIST): make_samples_no_alpha
+	./make_samples_no_alpha $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
 		'data/IMPTdvh/impt%d.mat' 25 1 Rectum \
 		$(ALPHA_PROTON_RECTUM_MEAN) $(ALPHA_PROTON_RECTUM_STD) \
 		$(BETA_PROTON_RECTUM_MEAN) $(BETA_PROTON_RECTUM_STD) \
@@ -223,7 +220,7 @@ $(PROTON_RECTUM_FILELIST): patient_no_alpha_RBEmax_spread_$(PATIENT)_make_sample
 		> log_$@.txt 2>&1
 
 
-patient_no_alpha_RBEmax_spread_$(PATIENT)_proton_rectum_sample_data.mat: patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples $(PROTON_RECTUM_FILELIST)
-	./patient_no_alpha_RBEmax_spread_$(PATIENT)_merge_samples $@ $(PROTON_RECTUM_FILELIST) && \
+proton_rectum_sample_no_alpha_data.mat: merge_samples_no_alpha $(PROTON_RECTUM_FILELIST)
+	./merge_samples_no_alpha $@ $(PROTON_RECTUM_FILELIST) && \
 		rm -f $@.backup $(PROTON_RECTUM_FILELIST) $(foreach N,$(PROTON_RECTUM_FILELIST),log_$(N).txt)
 

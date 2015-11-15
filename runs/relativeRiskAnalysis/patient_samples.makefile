@@ -124,7 +124,7 @@ EOF
 endef
 export patient_$(PATIENT)_merge_samples
 
-patient_$(PATIENT)_merge_samples: samples.makefile
+patient_$(PATIENT)_merge_samples: patient_samples.makefile
 	echo "$$patient_$(PATIENT)_merge_samples" > $@
 	chmod +x $@
 
@@ -163,7 +163,7 @@ EOF
 endef
 export patient_$(PATIENT)_make_samples
 
-patient_$(PATIENT)_make_samples: samples.makefile
+patient_$(PATIENT)_make_samples: patient_samples.makefile
 	echo "$$patient_$(PATIENT)_make_samples" > $@
 	chmod +x $@
 

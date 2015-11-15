@@ -124,7 +124,7 @@ EOF
 endef
 export patient_no_RBEmax_spread_$(PATIENT)_merge_samples
 
-patient_no_RBEmax_spread_$(PATIENT)_merge_samples: samples.makefile
+patient_no_RBEmax_spread_$(PATIENT)_merge_samples: patient_no_RBEmax_spread_samples.makefile
 	echo "$$patient_no_RBEmax_spread_$(PATIENT)_merge_samples" > $@
 	chmod +x $@
 
@@ -163,7 +163,7 @@ EOF
 endef
 export patient_no_RBEmax_spread_$(PATIENT)_make_samples
 
-patient_no_RBEmax_spread_$(PATIENT)_make_samples: samples.makefile
+patient_no_RBEmax_spread_$(PATIENT)_make_samples: patient_no_RBEmax_spread_samples.makefile
 	echo "$$patient_no_RBEmax_spread_$(PATIENT)_make_samples" > $@
 	chmod +x $@
 

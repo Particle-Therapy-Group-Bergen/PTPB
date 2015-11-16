@@ -47,7 +47,7 @@ def prepare_argument_parser():
     argparser = argparse.ArgumentParser(
         description = """Applies dose response models to one or more dose volume
             histograms (DVHs) loaded from file. The modified DVHs are then
-            written out to file again in the same overal format as the input
+            written out to file again in the same overall format as the input
             files.""")
     argparser.add_argument("filelist", metavar = "<file>", nargs = '+',
         help = """One or more input DVH data files.""")

@@ -53,12 +53,12 @@ hypercube_cion_rectum.mat: make_hypercube
 
 hypercube_proton_bladder.mat: make_hypercube
 	./make_hypercube $@ 'data/VMATdvh/vmat%d.mat' 25 1 \
-		'data/IMPTdvh/impt%d.mat' 25 1 \
+		'data/IMPTdvh/impt%d.mat' 25 1/1.1 \
 		Bladder '[1.00 1.03 1.06 1.09]' '[1.10 1.25 1.40 1.55]' > log_$@.txt 2>&1
 
 hypercube_proton_rectum.mat: make_hypercube
 	./make_hypercube $@ 'data/VMATdvh/vmat%d.mat' 25 1 \
-		'data/IMPTdvh/impt%d.mat' 25 1 \
+		'data/IMPTdvh/impt%d.mat' 25 1/1.1 \
 		Rectum '[1.00 1.03 1.06 1.09]' '[1.10 1.25 1.40 1.55]' > log_$@.txt 2>&1
 
 

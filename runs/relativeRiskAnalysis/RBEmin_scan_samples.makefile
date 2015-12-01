@@ -194,7 +194,7 @@ RBEmin_scan_cion_rectum_sample_data.mat: merge_RBEmin_scan_samples $(CION_RECTUM
 
 $(PROTON_BLADDER_FILELIST): make_RBEmin_scan_samples
 	./make_RBEmin_scan_samples $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
-		'data/IMPTdvh/impt%d.mat' 25 1 Bladder \
+		'data/IMPTdvh/impt%d.mat' 25 1/1.1 Bladder \
 		$(ALPHA_PROTON_BLADDER_MEAN) $(ALPHA_PROTON_BLADDER_STD) \
 		$(BETA_PROTON_BLADDER_MEAN) $(BETA_PROTON_BLADDER_STD) \
 		$(RBEMIN_PROTON_BLADDER_LOW) $(RBEMIN_PROTON_BLADDER_HIGH) \
@@ -209,7 +209,7 @@ RBEmin_scan_proton_bladder_sample_data.mat: merge_RBEmin_scan_samples $(PROTON_B
 
 $(PROTON_RECTUM_FILELIST): make_RBEmin_scan_samples
 	./make_RBEmin_scan_samples $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
-		'data/IMPTdvh/impt%d.mat' 25 1 Rectum \
+		'data/IMPTdvh/impt%d.mat' 25 1/1.1 Rectum \
 		$(ALPHA_PROTON_RECTUM_MEAN) $(ALPHA_PROTON_RECTUM_STD) \
 		$(BETA_PROTON_RECTUM_MEAN) $(BETA_PROTON_RECTUM_STD) \
 		$(RBEMIN_PROTON_RECTUM_LOW) $(RBEMIN_PROTON_RECTUM_HIGH) \

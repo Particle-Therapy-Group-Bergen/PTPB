@@ -200,7 +200,7 @@ patient_no_alpha_beta_RBE_spread_$(PATIENT)_cion_rectum_sample_data.mat: patient
 
 $(PROTON_BLADDER_FILELIST): patient_no_alpha_beta_RBE_spread_$(PATIENT)_make_samples
 	./patient_no_alpha_beta_RBE_spread_$(PATIENT)_make_samples $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
-		'data/IMPTdvh/impt%d.mat' 25 1 Bladder \
+		'data/IMPTdvh/impt%d.mat' 25 1/1.1 Bladder \
 		$(ALPHA_PROTON_BLADDER_MEAN) $(ALPHA_PROTON_BLADDER_STD) \
 		$(BETA_PROTON_BLADDER_MEAN) $(BETA_PROTON_BLADDER_STD) \
 		$(RBEMIN_PROTON_BLADDER_LOW) $(RBEMIN_PROTON_BLADDER_MODE) $(RBEMIN_PROTON_BLADDER_HIGH) \
@@ -215,7 +215,7 @@ patient_no_alpha_beta_RBE_spread_$(PATIENT)_proton_bladder_sample_data.mat: pati
 
 $(PROTON_RECTUM_FILELIST): patient_no_alpha_beta_RBE_spread_$(PATIENT)_make_samples
 	./patient_no_alpha_beta_RBE_spread_$(PATIENT)_make_samples $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 25 1 \
-		'data/IMPTdvh/impt%d.mat' 25 1 Rectum \
+		'data/IMPTdvh/impt%d.mat' 25 1/1.1 Rectum \
 		$(ALPHA_PROTON_RECTUM_MEAN) $(ALPHA_PROTON_RECTUM_STD) \
 		$(BETA_PROTON_RECTUM_MEAN) $(BETA_PROTON_RECTUM_STD) \
 		$(RBEMIN_PROTON_RECTUM_LOW) $(RBEMIN_PROTON_RECTUM_MODE) $(RBEMIN_PROTON_RECTUM_HIGH) \

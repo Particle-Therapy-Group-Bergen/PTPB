@@ -32,7 +32,11 @@ end
 
 for n = 1:length(patientIDs)
     filename = sprintf(filepattern, patientIDs(n));
-    [R, U, D] = calcDistribStats(filename, M, N);
+    if ~ exist('N')
+        [R, U, D] = calcDistribStats(filename, M);
+    else
+        [R, U, D] = calcDistribStats(filename, M, N);
+    end
     results(n,:) = R;
     uncertainty(n,:) = U;
     datacube(n,:,:) = D;

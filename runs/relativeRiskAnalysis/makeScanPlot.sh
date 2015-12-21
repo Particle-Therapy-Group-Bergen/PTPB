@@ -28,6 +28,12 @@ else
     TECH_ORGAN_NAME="cion_bladder"
 fi
 
+if echo "$TECH_ORGAN_NAME" | grep '^cion_' > /dev/null ; then
+    TITLE_DENOM="C-ion"
+else
+    TITLE_DENOM="IMPT"
+fi
+
 create_datafile () {
 octave -q <<EOF
 z = $1;
@@ -91,7 +97,7 @@ set cntrparam order 7
 set cntrparam points 10
 set xrange [0.01:0.79]
 set yrange [0.01:0.05]
-set zrange [0.25:2.25]
+set zrange [0.25:5]
 set cbrange [0.25:2.25]
 unset surface
 set table "contours_${TECH_ORGAN_NAME}_$N.dat"
@@ -128,7 +134,7 @@ set pm3d interpolate 4,4
 # set title "Cion - Bladder - RBEmin = 1.05, RBEmax = 2"
 set xrange [0.01:0.79]
 set yrange [0.01:0.05]
-set zrange [0.25:2.25]
+set zrange [0.25:5]
 set cbrange [0.25:2.25]
 
 px1 = 0.085
@@ -318,7 +324,7 @@ splot "relative_risk_${TECH_ORGAN_NAME}_43.dat", \
 
 cbwidth = px5 - px1
 set colorbox horizontal user origin px1,0.055 size cbwidth,0.013
-set cblabel "Relative Risk (VMAT/C-ion)"
+set cblabel "Relative Risk (VMAT/${TITLE_DENOM})"
 set xlabel xlabelvalue
 set format x
 set label 1 "RBE_{max} = $RBEMAX_4" at screen pRBElabelx, pRBElabely4 center rotate

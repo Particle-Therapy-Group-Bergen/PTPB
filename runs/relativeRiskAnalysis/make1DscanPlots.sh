@@ -72,7 +72,8 @@ for n = 1:length(bins)-1
     low = bins(n);
     high = bins(n+1);
     index = find(low <= Results(:,$DIM) & Results(:,$DIM) < high);
-    data = Results(index,1);
+    D = Results(index,1);
+    data = D( find(0 < D & D < 100) );   % removing outliers
     Q = quantile(data, [0.025, 0.5, 0.975], 1, 8);
     M = mean(data);
     x = (low + high) * 0.5;

@@ -36,7 +36,7 @@ OUTPUT_FILES = $(subst .eps,.dat,$(PLOT_FILES))
 
 .PHONY: all clean cleanall
 
-all: $(PLOT_FILES) summary_1d_plots.eps
+all: $(PLOT_FILES) summary_1d_plots.eps summary_cion_1d_plots.eps summary_proton_1d_plots.eps
 
 clean:
 	rm -rf $(OUTPUT_FILES)
@@ -65,77 +65,86 @@ RBEmax_scan_proton_%.eps: RBEmax_scan_proton_%_sample_data.mat scan_1D_plots.mak
 
 
 define gnuplot_1d_summary_plot_script
-set terminal postscript eps color enhanced dashed size 16cm,16cm
+set terminal postscript eps color enhanced dashed size 16cm,24cm
 set output "summary_1d_plots.eps"
-set multiplot layout 3,2 columnsfirst downwards
+set multiplot layout 4,2 columnsfirst downwards
 set ylabel "Relative Risk"
 set xlabel "{/Symbol a}  [Gy^{-1}]"
 set xrange [0:0.8]
-set yrange [0:3]
-plot "alpha_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "red" title "VMAT/C-ion bladder", \
-     "alpha_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "red" notitle, \
-     "alpha_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "red" notitle, \
-     "alpha_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "orange" title "VMAT/C-ion rectum", \
-     "alpha_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "orange" notitle, \
-     "alpha_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "orange" notitle, \
-     "alpha_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "green" title "VMAT/IMPT bladder", \
-     "alpha_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "green" notitle, \
-     "alpha_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "green" notitle, \
-     "alpha_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "blue" title "VMAT/IMPT rectum", \
-     "alpha_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "blue" notitle, \
-     "alpha_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "blue" notitle
+set yrange [0:3.2]
+set key at 0.75,3
+plot "alpha_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/C-ion bladder", \
+     "alpha_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "alpha_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "alpha_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/C-ion rectum", \
+     "alpha_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "alpha_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
 unset key
-set xlabel "RBE_{max}  [Gy]"
-set xrange [1:9]
-set yrange [0:3]
-plot "RBEmax_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "red" title "VMAT/C-ion bladder", \
-     "RBEmax_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "red" notitle, \
-     "RBEmax_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "red" notitle, \
-     "RBEmax_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "orange" title "VMAT/C-ion rectum", \
-     "RBEmax_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "orange" notitle, \
-     "RBEmax_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "orange" notitle
-set xlabel "RBE_{max}  [Gy]"
-set xrange [1.05:1.6]
-set yrange [0:3.5]
-plot "RBEmax_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "green" title "VMAT/IMPT bladder", \
-     "RBEmax_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "green" notitle, \
-     "RBEmax_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "green" notitle, \
-     "RBEmax_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "blue" title "VMAT/IMPT rectum", \
-     "RBEmax_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "blue" notitle, \
-     "RBEmax_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "blue" notitle
 set xlabel "{/Symbol b}  [Gy^{-2}]"
 set xrange [0.01:0.05]
-set yrange [0:3]
-plot "beta_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "red" title "VMAT/C-ion bladder", \
-     "beta_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "red" notitle, \
-     "beta_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "red" notitle, \
-     "beta_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "orange" title "VMAT/C-ion rectum", \
-     "beta_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "orange" notitle, \
-     "beta_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "orange" notitle, \
-     "beta_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "green" title "VMAT/IMPT bladder", \
-     "beta_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "green" notitle, \
-     "beta_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "green" notitle, \
-     "beta_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "blue" title "VMAT/IMPT rectum", \
-     "beta_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "blue" notitle, \
-     "beta_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "blue" notitle
-set xlabel "RBE_{min}  [Gy]"
+set yrange [0:3.2]
+plot "beta_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/C-ion bladder", \
+     "beta_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "beta_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "beta_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/C-ion rectum", \
+     "beta_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "beta_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+set xlabel "RBE_{max}"
+set xrange [1:9]
+set yrange [0:3.2]
+plot "RBEmax_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/C-ion bladder", \
+     "RBEmax_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmax_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmax_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/C-ion rectum", \
+     "RBEmax_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "RBEmax_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+set xlabel "RBE_{min}"
 set xrange [1:1.4]
-set yrange [0:3]
-plot "RBEmin_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "red" title "VMAT/C-ion bladder", \
-     "RBEmin_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "red" notitle, \
-     "RBEmin_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "red" notitle, \
-     "RBEmin_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "orange" title "VMAT/C-ion rectum", \
-     "RBEmin_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "orange" notitle, \
-     "RBEmin_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "orange" notitle
-set xlabel "RBE_{min}  [Gy]"
+set yrange [0:3.2]
+plot "RBEmin_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/C-ion bladder", \
+     "RBEmin_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmin_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmin_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/C-ion rectum", \
+     "RBEmin_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "RBEmin_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+set key at 0.75,3
+set xlabel "{/Symbol a}  [Gy^{-1}]"
+set xrange [0:0.8]
+set yrange [0:3.2]
+plot "alpha_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/IMPT bladder", \
+     "alpha_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "alpha_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "alpha_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/IMPT rectum", \
+     "alpha_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "alpha_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+unset key
+set xlabel "{/Symbol b}  [Gy^{-2}]"
+set xrange [0.01:0.05]
+set yrange [0:3.2]
+plot "beta_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/IMPT bladder", \
+     "beta_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "beta_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "beta_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/IMPT rectum", \
+     "beta_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "beta_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+set xlabel "RBE_{max}"
+set xrange [1.05:1.6]
+set yrange [0:3.2]
+plot "RBEmax_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/IMPT bladder", \
+     "RBEmax_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmax_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmax_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/IMPT rectum", \
+     "RBEmax_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "RBEmax_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+set xlabel "RBE_{min}"
 set xrange [1:1.1]
-set yrange [0:3]
-plot "RBEmin_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "green" title "VMAT/IMPT bladder", \
-     "RBEmin_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "green" notitle, \
-     "RBEmin_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "green" notitle, \
-     "RBEmin_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "blue" title "VMAT/IMPT rectum", \
-     "RBEmin_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "blue" notitle, \
-     "RBEmin_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "blue" notitle
+set yrange [0:3.2]
+plot "RBEmin_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/IMPT bladder", \
+     "RBEmin_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmin_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmin_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/IMPT rectum", \
+     "RBEmin_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "RBEmin_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
 endef
 
 export gnuplot_1d_summary_plot_script
@@ -144,4 +153,112 @@ summary_1d_plots.gp: scan_1D_plots.makefile
 	echo "$$gnuplot_1d_summary_plot_script" > $@
 
 summary_1d_plots.eps: summary_1d_plots.gp $(PLOT_FILES)
+	gnuplot $<
+
+
+define gnuplot_cion_1d_summary_plot_script
+set terminal postscript eps color enhanced dashed size 16cm,12cm
+set output "summary_cion_1d_plots.eps"
+set multiplot layout 2,2 columnsfirst downwards
+set ylabel "Relative Risk"
+set xlabel "{/Symbol a}  [Gy^{-1}]"
+set xrange [0:0.8]
+set yrange [0:3.2]
+set key at 0.75,3
+plot "alpha_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/C-ion bladder", \
+     "alpha_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "alpha_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "alpha_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/C-ion rectum", \
+     "alpha_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "alpha_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+unset key
+set xlabel "RBE_{max}"
+set xrange [1:9]
+set yrange [0:3.2]
+plot "RBEmax_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/C-ion bladder", \
+     "RBEmax_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmax_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmax_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/C-ion rectum", \
+     "RBEmax_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "RBEmax_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+set xlabel "{/Symbol b}  [Gy^{-2}]"
+set xrange [0.01:0.05]
+set yrange [0:3.2]
+plot "beta_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/C-ion bladder", \
+     "beta_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "beta_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "beta_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/C-ion rectum", \
+     "beta_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "beta_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+set xlabel "RBE_{min}"
+set xrange [1:1.4]
+set yrange [0:3.2]
+plot "RBEmin_scan_cion_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/C-ion bladder", \
+     "RBEmin_scan_cion_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmin_scan_cion_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmin_scan_cion_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/C-ion rectum", \
+     "RBEmin_scan_cion_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "RBEmin_scan_cion_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+endef
+
+
+define gnuplot_proton_1d_summary_plot_script
+set terminal postscript eps color enhanced dashed size 16cm,12cm
+set output "summary_proton_1d_plots.eps"
+set multiplot layout 2,2 columnsfirst downwards
+set ylabel "Relative Risk"
+set xlabel "{/Symbol a}  [Gy^{-1}]"
+set xrange [0:0.8]
+set yrange [0:3.2]
+set key at 0.75,3
+plot "alpha_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/IMPT bladder", \
+     "alpha_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "alpha_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "alpha_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/IMPT rectum", \
+     "alpha_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "alpha_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+unset key
+set xlabel "RBE_{max}"
+set xrange [1.05:1.6]
+set yrange [0:3.2]
+plot "RBEmax_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/IMPT bladder", \
+     "RBEmax_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmax_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmax_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/IMPT rectum", \
+     "RBEmax_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "RBEmax_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+set xlabel "{/Symbol b}  [Gy^{-2}]"
+set xrange [0.01:0.05]
+set yrange [0:3.2]
+plot "beta_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/IMPT bladder", \
+     "beta_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "beta_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "beta_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/IMPT rectum", \
+     "beta_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "beta_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+set xlabel "RBE_{min}"
+set xrange [1:1.1]
+set yrange [0:3.2]
+plot "RBEmin_scan_proton_bladder.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#CE0000" title "VMAT/IMPT bladder", \
+     "RBEmin_scan_proton_bladder.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmin_scan_proton_bladder.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#CE0000" notitle, \
+     "RBEmin_scan_proton_rectum.dat" using 1:2 with lines lt 1 lw 2 lc rgb "#1080FF" title "VMAT/IMPT rectum", \
+     "RBEmin_scan_proton_rectum.dat" using 1:3 with lines lt 3 lw 1 lc rgb "#1080FF" notitle, \
+     "RBEmin_scan_proton_rectum.dat" using 1:5 with lines lt 3 lw 1 lc rgb "#1080FF" notitle
+endef
+
+
+export gnuplot_cion_1d_summary_plot_script
+export gnuplot_proton_1d_summary_plot_script
+
+summary_cion_1d_plots.gp: scan_1D_plots.makefile
+	echo "$$gnuplot_cion_1d_summary_plot_script" > $@
+
+summary_proton_1d_plots.gp: scan_1D_plots.makefile
+	echo "$$gnuplot_proton_1d_summary_plot_script" > $@
+
+summary_cion_1d_plots.eps: summary_cion_1d_plots.gp $(PLOT_FILES)
+	gnuplot $<
+
+summary_proton_1d_plots.eps: summary_proton_1d_plots.gp $(PLOT_FILES)
 	gnuplot $<

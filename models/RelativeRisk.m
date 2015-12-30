@@ -3,6 +3,8 @@ function factor = RelativeRisk(model, dvh1, dvh2, varargin)
 %factor = RelativeRisk(model, dvh1, dvh2, opts, ...)
 %factor = RelativeRisk('LinearQuad', dvh1, dvh2, n1, n2, alpha, beta, RBEmin, RBEmax)
 %factor = RelativeRisk('LinearQuad', dvh1, dvh2, opts, n1, n2, alpha, beta, RBEmin, RBEmax)
+%factor = RelativeRisk('LinearQuadMultiRBE', dvh1, dvh2, n1, n2, alpha, beta, RBEmin1, RBEmax1, RBEmin2, RBEmax2)
+%factor = RelativeRisk('LinearQuadMultiRBE', dvh1, dvh2, opts, n1, n2, alpha, beta, RBEmin1, RBEmax1, RBEmin2, RBEmax2)
 %
 % Calculates the Relative Risk (RR) from the cumulative dose distribution data points.
 % i.e the following integration is performed:
@@ -100,6 +102,19 @@ switch model
         RBEmax = params{6};
         integrand1 = @(x) LinearQuad(x, n1, alpha, beta);
         integrand2 = @(x) LinearQuad(x, n2, RBEmax .* alpha, RBEmin.^2 .* beta);
+    case 'LinearQuadMultiRBE'
+        n1 = params{1};
+        n2 = params{2};
+        alpha = params{3};
+        beta = params{4};
+        RBEmin1 = params{5};
+        RBEmax1 = params{6};
+        RBEmin2 = params{7};
+        RBEmax2 = params{8};
+        integrand1 = @(x) LinearQuad(x, n1, alpha, beta);
+        integrand2 = @(x) LinearQuadMulti(x, n2,
+                                          RBEmax1 .* alpha, RBEmin1.^2 .* beta,
+                                          RBEmax2 .* alpha, RBEmin2.^2 .* beta);
     otherwise
         error('Unknown response model type "%s".', model);
 end
@@ -117,4 +132,15 @@ function y = LinearQuad(d, n, alpha, beta)
 % radio-sensitivity parameters.
 k = alpha .* d + beta .* d.^2 ./ n;
 y = k .* exp(-k);
+return;
+
+
+function y = LinearQuadMulti(d, n, alpha1, beta1, alpha2, beta2)
+% Linear quadratic form:
+%   (alpha1 * D + beta1 * D^2 / n) * exp( - (alpha2 * D + beta2 * D^2 / n) )
+% where D is dose, n is the number of fractionations, alpha and beta are the
+% radio-sensitivity parameters.
+k1 = alpha1 .* d + beta1 .* d.^2 ./ n;
+k2 = alpha2 .* d + beta2 .* d.^2 ./ n;
+y = k1 .* exp(-k2);
 return;

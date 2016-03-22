@@ -21,8 +21,8 @@
 ###############################################################################
 
 # This makefile will generate samples for the reference point for C-ion and
-# Proton Relative Risk values. The reference point has number of fractionations
-# equal to 1 and RBEmin/RBEmax = 1.
+# Proton Relative Risk values. This reference point has number of fractionations
+# equal to 1.
 
 ITERATIONS = 100
 N_SAMPLES = 1000

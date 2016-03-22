@@ -81,10 +81,10 @@ PROTON_BLADDER_FILELIST = $(foreach N,$(FILEIDS),proton_bladder_samples_referenc
 PROTON_RECTUM_FILELIST = $(foreach N,$(FILEIDS),proton_rectum_samples_reference_$(N).mat)
 FILELIST = $(CION_BLADDER_FILELIST) $(CION_RECTUM_FILELIST) $(PROTON_BLADDER_FILELIST) $(PROTON_RECTUM_FILELIST)
 
-OUTPUT_FILES = cion_bladder_sample_data.mat \
-               cion_rectum_sample_data.mat \
-               proton_bladder_sample_data.mat \
-               proton_rectum_sample_data.mat
+OUTPUT_FILES = cion_bladder_reference_sample_data.mat \
+               cion_rectum_reference_sample_data.mat \
+               proton_bladder_reference_sample_data.mat \
+               proton_rectum_reference_sample_data.mat
 
 .PHONY: all clean
 
@@ -176,7 +176,7 @@ $(CION_BLADDER_FILELIST): make_samples_reference
 		> log_$@.txt 2>&1
 
 
-cion_bladder_sample_data.mat: merge_samples_reference $(CION_BLADDER_FILELIST)
+cion_bladder_reference_sample_data.mat: merge_samples_reference $(CION_BLADDER_FILELIST)
 	./merge_samples_reference $@ $(CION_BLADDER_FILELIST) && \
 		rm -f $@.backup $(CION_BLADDER_FILELIST) $(foreach N,$(CION_BLADDER_FILELIST),log_$(N).txt)
 
@@ -191,7 +191,7 @@ $(CION_RECTUM_FILELIST): make_samples_reference
 		> log_$@.txt 2>&1
 
 
-cion_rectum_sample_data.mat: merge_samples_reference $(CION_RECTUM_FILELIST)
+cion_rectum_reference_sample_data.mat: merge_samples_reference $(CION_RECTUM_FILELIST)
 	./merge_samples_reference $@ $(CION_RECTUM_FILELIST) && \
 		rm -f $@.backup $(CION_RECTUM_FILELIST) $(foreach N,$(CION_RECTUM_FILELIST),log_$(N).txt)
 
@@ -206,7 +206,7 @@ $(PROTON_BLADDER_FILELIST): make_samples_reference
 		> log_$@.txt 2>&1
 
 
-proton_bladder_sample_data.mat: merge_samples_reference $(PROTON_BLADDER_FILELIST)
+proton_bladder_reference_sample_data.mat: merge_samples_reference $(PROTON_BLADDER_FILELIST)
 	./merge_samples_reference $@ $(PROTON_BLADDER_FILELIST) && \
 		rm -f $@.backup $(PROTON_BLADDER_FILELIST) $(foreach N,$(PROTON_BLADDER_FILELIST),log_$(N).txt)
 
@@ -221,7 +221,7 @@ $(PROTON_RECTUM_FILELIST): make_samples_reference
 		> log_$@.txt 2>&1
 
 
-proton_rectum_sample_data.mat: merge_samples_reference $(PROTON_RECTUM_FILELIST)
+proton_rectum_reference_sample_data.mat: merge_samples_reference $(PROTON_RECTUM_FILELIST)
 	./merge_samples_reference $@ $(PROTON_RECTUM_FILELIST) && \
 		rm -f $@.backup $(PROTON_RECTUM_FILELIST) $(foreach N,$(PROTON_RECTUM_FILELIST),log_$(N).txt)
 

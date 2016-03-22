@@ -70,6 +70,7 @@ data: hypercubes \
   per-patient-no-alpha-beta-RBEmax-spread-samples \
   per-patient-no-alpha-beta-RBE-spread-samples \
   samples \
+  samples-reference \
   samples-no-alpha \
   samples-no-beta \
   samples-no-RBEmin \
@@ -90,6 +91,7 @@ clean: clean-hypercubes \
   clean-per-patient-no-alpha-beta-RBEmax-spread-samples \
   clean-per-patient-no-alpha-beta-RBE-spread-samples \
   clean-samples \
+  clean-samples-reference \
   clean-samples-no-alpha \
   clean-samples-no-beta \
   clean-samples-no-RBEmin \
@@ -108,6 +110,7 @@ cleanall: cleanall-hypercubes \
   cleanall-per-patient-no-alpha-beta-RBEmax-spread-samples \
   cleanall-per-patient-no-alpha-beta-RBE-spread-samples \
   cleanall-samples \
+  cleanall-samples-reference \
   cleanall-samples-no-alpha \
   cleanall-samples-no-beta \
   cleanall-samples-no-RBEmin \
@@ -269,6 +272,16 @@ clean-samples:
 
 cleanall-samples:
 	$(MAKE) -f samples.makefile cleanall
+
+
+samples-reference:
+	$(MAKE) -f samples_reference.makefile OCTAVE="$(OCTAVE)"
+
+clean-samples-reference:
+	$(MAKE) -f samples_reference.makefile clean
+
+cleanall-samples-reference:
+	$(MAKE) -f samples_reference.makefile cleanall
 
 
 samples-no-alpha:

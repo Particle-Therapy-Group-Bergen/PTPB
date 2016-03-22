@@ -70,7 +70,8 @@ data: hypercubes \
   per-patient-no-alpha-beta-RBEmax-spread-samples \
   per-patient-no-alpha-beta-RBE-spread-samples \
   samples \
-  samples-reference \
+  samples-rbe-one \
+  samples-no-frac \
   samples-no-alpha \
   samples-no-beta \
   samples-no-RBEmin \
@@ -91,7 +92,8 @@ clean: clean-hypercubes \
   clean-per-patient-no-alpha-beta-RBEmax-spread-samples \
   clean-per-patient-no-alpha-beta-RBE-spread-samples \
   clean-samples \
-  clean-samples-reference \
+  clean-samples-rbe-one \
+  clean-samples-no-frac \
   clean-samples-no-alpha \
   clean-samples-no-beta \
   clean-samples-no-RBEmin \
@@ -110,7 +112,8 @@ cleanall: cleanall-hypercubes \
   cleanall-per-patient-no-alpha-beta-RBEmax-spread-samples \
   cleanall-per-patient-no-alpha-beta-RBE-spread-samples \
   cleanall-samples \
-  cleanall-samples-reference \
+  cleanall-samples-rbe-one \
+  cleanall-samples-no-frac \
   cleanall-samples-no-alpha \
   cleanall-samples-no-beta \
   cleanall-samples-no-RBEmin \
@@ -274,14 +277,24 @@ cleanall-samples:
 	$(MAKE) -f samples.makefile cleanall
 
 
-samples-reference:
-	$(MAKE) -f samples_reference.makefile OCTAVE="$(OCTAVE)"
+samples-rbe-one:
+	$(MAKE) -f samples_rbe_one.makefile OCTAVE="$(OCTAVE)"
 
-clean-samples-reference:
-	$(MAKE) -f samples_reference.makefile clean
+clean-samples-rbe-one:
+	$(MAKE) -f samples_rbe_one.makefile clean
 
-cleanall-samples-reference:
-	$(MAKE) -f samples_reference.makefile cleanall
+cleanall-samples-rbe-one:
+	$(MAKE) -f samples_rbe_one.makefile cleanall
+
+
+samples-no-frac:
+	$(MAKE) -f samples_no_frac.makefile OCTAVE="$(OCTAVE)"
+
+clean-samples-no-frac:
+	$(MAKE) -f samples_no_frac.makefile clean
+
+cleanall-samples-no-frac:
+	$(MAKE) -f samples_no_frac.makefile cleanall
 
 
 samples-no-alpha:

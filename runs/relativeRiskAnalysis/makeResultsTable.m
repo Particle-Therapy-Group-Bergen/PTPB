@@ -26,6 +26,8 @@ end
 
 filepatterns = {
     '%s_sample_data.mat',
+    '%s_sample_rbe_one_data.mat',
+    '%s_sample_no_frac_data.mat',
     '%s_sample_no_alpha_data.mat',
     '%s_sample_no_beta_data.mat',
     '%s_sample_no_RBEmin_data.mat',

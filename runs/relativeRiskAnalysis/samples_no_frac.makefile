@@ -31,12 +31,12 @@ ALPHA_CION_BLADDER_MEAN = 0.25
 ALPHA_CION_BLADDER_STD = 0.075
 BETA_CION_BLADDER_MEAN = 0.033
 BETA_CION_BLADDER_STD = 0.0055
-RBEMIN_CION_BLADDER_LOW = 1.0
-RBEMIN_CION_BLADDER_MODE = 1.0
-RBEMIN_CION_BLADDER_HIGH = 1.0
-RBEMAX_CION_BLADDER_LOW = 1.0
-RBEMAX_CION_BLADDER_MODE = 1.0
-RBEMAX_CION_BLADDER_HIGH = 1.0
+RBEMIN_CION_BLADDER_LOW = 1.2
+RBEMIN_CION_BLADDER_MODE = 1.25
+RBEMIN_CION_BLADDER_HIGH = 1.3
+RBEMAX_CION_BLADDER_LOW = 5
+RBEMAX_CION_BLADDER_MODE = 6
+RBEMAX_CION_BLADDER_HIGH = 7
 
 ALPHA_CION_RECTUM_MEAN = $(ALPHA_CION_BLADDER_MEAN)
 ALPHA_CION_RECTUM_STD = $(ALPHA_CION_BLADDER_STD)
@@ -53,12 +53,12 @@ ALPHA_PROTON_BLADDER_MEAN = $(ALPHA_CION_BLADDER_MEAN)
 ALPHA_PROTON_BLADDER_STD = $(ALPHA_CION_BLADDER_STD)
 BETA_PROTON_BLADDER_MEAN = $(BETA_CION_BLADDER_MEAN)
 BETA_PROTON_BLADDER_STD = $(BETA_CION_BLADDER_STD)
-RBEMIN_PROTON_BLADDER_LOW = 1.0
-RBEMIN_PROTON_BLADDER_MODE = 1.0
-RBEMIN_PROTON_BLADDER_HIGH = 1.0
-RBEMAX_PROTON_BLADDER_LOW = 1.0
-RBEMAX_PROTON_BLADDER_MODE = 1.0
-RBEMAX_PROTON_BLADDER_HIGH = 1.0
+RBEMIN_PROTON_BLADDER_LOW = 1.01
+RBEMIN_PROTON_BLADDER_MODE = 1.03
+RBEMIN_PROTON_BLADDER_HIGH = 1.05
+RBEMAX_PROTON_BLADDER_LOW = 1.2
+RBEMAX_PROTON_BLADDER_MODE = 1.25
+RBEMAX_PROTON_BLADDER_HIGH = 1.3
 
 ALPHA_PROTON_RECTUM_MEAN = $(ALPHA_CION_RECTUM_MEAN)
 ALPHA_PROTON_RECTUM_STD = $(ALPHA_CION_RECTUM_STD)
@@ -75,16 +75,16 @@ OCTAVE = octave -q --path ~/bin/PTPB_mfiles
 
 FILEIDS = $(shell N=1; while test $$N -le $(ITERATIONS); do echo $$N ; N=$$((N+1)) ; done)
 
-CION_BLADDER_FILELIST = $(foreach N,$(FILEIDS),cion_bladder_samples_reference_$(N).mat)
-CION_RECTUM_FILELIST = $(foreach N,$(FILEIDS),cion_rectum_samples_reference_$(N).mat)
-PROTON_BLADDER_FILELIST = $(foreach N,$(FILEIDS),proton_bladder_samples_reference_$(N).mat)
-PROTON_RECTUM_FILELIST = $(foreach N,$(FILEIDS),proton_rectum_samples_reference_$(N).mat)
+CION_BLADDER_FILELIST = $(foreach N,$(FILEIDS),cion_bladder_samples_no_frac_$(N).mat)
+CION_RECTUM_FILELIST = $(foreach N,$(FILEIDS),cion_rectum_samples_no_frac_$(N).mat)
+PROTON_BLADDER_FILELIST = $(foreach N,$(FILEIDS),proton_bladder_samples_no_frac_$(N).mat)
+PROTON_RECTUM_FILELIST = $(foreach N,$(FILEIDS),proton_rectum_samples_no_frac_$(N).mat)
 FILELIST = $(CION_BLADDER_FILELIST) $(CION_RECTUM_FILELIST) $(PROTON_BLADDER_FILELIST) $(PROTON_RECTUM_FILELIST)
 
-OUTPUT_FILES = cion_bladder_reference_sample_data.mat \
-               cion_rectum_reference_sample_data.mat \
-               proton_bladder_reference_sample_data.mat \
-               proton_rectum_reference_sample_data.mat
+OUTPUT_FILES = cion_bladder_sample_no_frac_data.mat \
+               cion_rectum_sample_no_frac_data.mat \
+               proton_bladder_sample_no_frac_data.mat \
+               proton_rectum_sample_no_frac_data.mat
 
 .PHONY: all clean
 
@@ -94,10 +94,10 @@ clean:
 	rm -rf $(FILELIST) $(foreach N,$(FILELIST),log_$(N).txt)
 
 cleanall: clean
-	rm -rf make_samples_reference merge_samples_reference $(OUTPUT_FILES)
+	rm -rf make_samples_no_frac merge_samples_no_frac $(OUTPUT_FILES)
 
 
-define merge_samples_reference
+define merge_samples_no_frac
 #!/bin/sh
 outfile="$$1"
 shift
@@ -120,14 +120,14 @@ end
 save('-v7', '$$outfile', 'Results');
 EOF
 endef
-export merge_samples_reference
+export merge_samples_no_frac
 
-merge_samples_reference: samples.makefile
-	echo "$$merge_samples_reference" > $@
+merge_samples_no_frac: samples.makefile
+	echo "$$merge_samples_no_frac" > $@
 	chmod +x $@
 
 
-define make_samples_reference
+define make_samples_no_frac
 #!/bin/sh
 exec $(OCTAVE) <<EOF
 Nsamples = $$2;
@@ -141,8 +141,8 @@ scale2 = $$8;
 organ = '$$9';
 alpha_distrib = struct('type', 'gaus', 'params', {{$$10, $$11}});
 beta_distrib = struct('type', 'gaus', 'params', {{$$12, $$13}});
-RBEmin_distrib = struct('type', 'delta', 'params', {{$$15}});
-RBEmax_distrib = struct('type', 'delta', 'params', {{$$18}});
+RBEmin_distrib = struct('type', 'triangle', 'params', {{$$14, $$15, $$16}});
+RBEmax_distrib = struct('type', 'triangle', 'params', {{$$17, $$18, $$19}});
 opts = struct('integration_method', 'trapz',
               'integration_tolerance', 1e-4,
               'interpolation_method', 'pchip',
@@ -159,15 +159,15 @@ Results = sampleMeanRelativeRisk(Nsamples, filepat1, filepat2, patients, organ,
 save('-v7', '$$1', 'Results');
 EOF
 endef
-export make_samples_reference
+export make_samples_no_frac
 
-make_samples_reference: samples.makefile
-	echo "$$make_samples_reference" > $@
+make_samples_no_frac: samples.makefile
+	echo "$$make_samples_no_frac" > $@
 	chmod +x $@
 
 
-$(CION_BLADDER_FILELIST): make_samples_reference
-	./make_samples_reference $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 1 1 \
+$(CION_BLADDER_FILELIST): make_samples_no_frac
+	./make_samples_no_frac $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 1 1 \
 		'data/CionDataPhysicalDose/HUH%dphysical_dvh.mat' 1 1 Bladder \
 		$(ALPHA_CION_BLADDER_MEAN) $(ALPHA_CION_BLADDER_STD) \
 		$(BETA_CION_BLADDER_MEAN) $(BETA_CION_BLADDER_STD) \
@@ -176,13 +176,13 @@ $(CION_BLADDER_FILELIST): make_samples_reference
 		> log_$@.txt 2>&1
 
 
-cion_bladder_reference_sample_data.mat: merge_samples_reference $(CION_BLADDER_FILELIST)
-	./merge_samples_reference $@ $(CION_BLADDER_FILELIST) && \
+cion_bladder_sample_no_frac_data.mat: merge_samples_no_frac $(CION_BLADDER_FILELIST)
+	./merge_samples_no_frac $@ $(CION_BLADDER_FILELIST) && \
 		rm -f $@.backup $(CION_BLADDER_FILELIST) $(foreach N,$(CION_BLADDER_FILELIST),log_$(N).txt)
 
 
-$(CION_RECTUM_FILELIST): make_samples_reference
-	./make_samples_reference $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 1 1 \
+$(CION_RECTUM_FILELIST): make_samples_no_frac
+	./make_samples_no_frac $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 1 1 \
 		'data/CionDataPhysicalDose/HUH%dphysical_dvh.mat' 1 1 Rectum \
 		$(ALPHA_CION_RECTUM_MEAN) $(ALPHA_CION_RECTUM_STD) \
 		$(BETA_CION_RECTUM_MEAN) $(BETA_CION_RECTUM_STD) \
@@ -191,13 +191,13 @@ $(CION_RECTUM_FILELIST): make_samples_reference
 		> log_$@.txt 2>&1
 
 
-cion_rectum_reference_sample_data.mat: merge_samples_reference $(CION_RECTUM_FILELIST)
-	./merge_samples_reference $@ $(CION_RECTUM_FILELIST) && \
+cion_rectum_sample_no_frac_data.mat: merge_samples_no_frac $(CION_RECTUM_FILELIST)
+	./merge_samples_no_frac $@ $(CION_RECTUM_FILELIST) && \
 		rm -f $@.backup $(CION_RECTUM_FILELIST) $(foreach N,$(CION_RECTUM_FILELIST),log_$(N).txt)
 
 
-$(PROTON_BLADDER_FILELIST): make_samples_reference
-	./make_samples_reference $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 1 1 \
+$(PROTON_BLADDER_FILELIST): make_samples_no_frac
+	./make_samples_no_frac $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 1 1 \
 		'data/IMPTdvh/impt%d.mat' 1 1/1.1 Bladder \
 		$(ALPHA_PROTON_BLADDER_MEAN) $(ALPHA_PROTON_BLADDER_STD) \
 		$(BETA_PROTON_BLADDER_MEAN) $(BETA_PROTON_BLADDER_STD) \
@@ -206,13 +206,13 @@ $(PROTON_BLADDER_FILELIST): make_samples_reference
 		> log_$@.txt 2>&1
 
 
-proton_bladder_reference_sample_data.mat: merge_samples_reference $(PROTON_BLADDER_FILELIST)
-	./merge_samples_reference $@ $(PROTON_BLADDER_FILELIST) && \
+proton_bladder_sample_no_frac_data.mat: merge_samples_no_frac $(PROTON_BLADDER_FILELIST)
+	./merge_samples_no_frac $@ $(PROTON_BLADDER_FILELIST) && \
 		rm -f $@.backup $(PROTON_BLADDER_FILELIST) $(foreach N,$(PROTON_BLADDER_FILELIST),log_$(N).txt)
 
 
-$(PROTON_RECTUM_FILELIST): make_samples_reference
-	./make_samples_reference $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 1 1 \
+$(PROTON_RECTUM_FILELIST): make_samples_no_frac
+	./make_samples_no_frac $@ $(N_SAMPLES) 'data/VMATdvh/vmat%d.mat' 1 1 \
 		'data/IMPTdvh/impt%d.mat' 1 1/1.1 Rectum \
 		$(ALPHA_PROTON_RECTUM_MEAN) $(ALPHA_PROTON_RECTUM_STD) \
 		$(BETA_PROTON_RECTUM_MEAN) $(BETA_PROTON_RECTUM_STD) \
@@ -221,7 +221,7 @@ $(PROTON_RECTUM_FILELIST): make_samples_reference
 		> log_$@.txt 2>&1
 
 
-proton_rectum_reference_sample_data.mat: merge_samples_reference $(PROTON_RECTUM_FILELIST)
-	./merge_samples_reference $@ $(PROTON_RECTUM_FILELIST) && \
+proton_rectum_sample_no_frac_data.mat: merge_samples_no_frac $(PROTON_RECTUM_FILELIST)
+	./merge_samples_no_frac $@ $(PROTON_RECTUM_FILELIST) && \
 		rm -f $@.backup $(PROTON_RECTUM_FILELIST) $(foreach N,$(PROTON_RECTUM_FILELIST),log_$(N).txt)
 

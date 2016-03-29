@@ -3,16 +3,17 @@ set output "per_patient_plot.eps"
 set multiplot layout 2,2 columnsfirst downwards
 set ylabel "Relative Risk"
 set xlabel "Patient"
-#set xrange [0:12.5]
+#set xrange [0:15]
 #set yrange [0:6]
-set xtics ("1" 1, "2" 2, "3" 3, "4" 4, "5" 5, "6" 6, "7" 7, "8" 8, "9" 9, "10" 10, "Mean" 11.5)
+set xtics ("1" 1, "2" 2, "3" 3, "4" 4, "5" 5, "6" 6, "7" 7, "8" 8, "9" 9, "10" 10, "Mean" 11.5, "R_{rbe}" 13, "R_n" 14)
 
 set title "VMAT/C-ion bladder"
 plot "-" using 1:2 with line lt 3 lw 1 lc rgb "#000000" notitle, \
      "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 13 ps 1.8 lc rgb "#1080FF" notitle, \
-     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 5 ps 1.4 lc rgb "#CE0000" notitle
+     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 5 ps 1.4 lc rgb "#CE0000" notitle, \
+     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 6 ps 1.4 lc rgb "#5F5F5F" notitle
         0       1
-        12.5    1
+        15      1
 EOF
         1       1.171645778     0.961413018     1.394799109
         2       0.604246864     0.312390561     1.248998076
@@ -28,13 +29,17 @@ EOF
 EOF
         11.5    1.3118837       0.6505619       2.1848833
 EOF
+        13      1.19138122      0.742120694     1.60496705
+        14      0.818930211     0.434227531     1.2823225
+EOF
 
 set title "VMAT/C-ion rectum"
 plot "-" using 1:2 with line lt 3 lw 1 lc rgb "#000000" notitle, \
      "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 13 ps 1.8 lc rgb "#1080FF" notitle, \
-     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 5 ps 1.4 lc rgb "#CE0000" notitle
+     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 5 ps 1.4 lc rgb "#CE0000" notitle, \
+     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 6 ps 1.4 lc rgb "#5F5F5F" notitle
         0       1
-        12.5    1
+        15      1
 EOF
         1       0.731211612     0.704569515     0.842373933
         2       0.755719433     0.568080745     1.118121185
@@ -49,13 +54,17 @@ EOF
 EOF
         11.5    0.5817372       0.4129403       0.7991492
 EOF
+        13      0.691522274     0.456031126     1.00349199
+        14      0.433118198     0.299480126     0.572087099
+EOF
 
 set title "VMAT/IMPT bladder"
 plot "-" using 1:2 with line lt 3 lw 1 lc rgb "#000000" notitle, \
      "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 13 ps 1.8 lc rgb "#1080FF" notitle, \
-     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 5 ps 1.4 lc rgb "#CE0000" notitle
+     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 5 ps 1.4 lc rgb "#CE0000" notitle, \
+     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 6 ps 1.4 lc rgb "#5F5F5F" notitle
         0       1
-        12.5    1
+        15      1
 EOF
         1       2.183086905     1.812047142     2.377832054
         2       0.974569024     0.518517680     1.820262433
@@ -70,13 +79,17 @@ EOF
 EOF
         11.5    1.7191894       1.0638891       2.3668484
 EOF
+        13      1.70656419      1.0524295       2.35775285
+        14      1.44391866      0.762823452     2.22061246
+EOF
 
 set title "VMAT/IMPT rectum"
 plot "-" using 1:2 with line lt 3 lw 1 lc rgb "#000000" notitle, \
      "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 13 ps 1.8 lc rgb "#1080FF" notitle, \
-     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 5 ps 1.4 lc rgb "#CE0000" notitle
+     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 5 ps 1.4 lc rgb "#CE0000" notitle, \
+     "-" using 1:2:3:4 with errorbars lt 1 lw 2 pt 6 ps 1.4 lc rgb "#5F5F5F" notitle
         0       1
-        12.5    1
+        15      1
 EOF
         1       1.602046599     1.496764648     1.733400791
         2       1.667402242     1.364943901     2.020864632
@@ -90,4 +103,7 @@ EOF
         10      0.974469762     0.834651001     1.116190719
 EOF
         11.5    1.0981823       0.7773345       1.4253127
+EOF
+        13      1.0745199       0.757330632     1.40408845
+        14      1.0305244       0.676997974     1.40034721
 EOF

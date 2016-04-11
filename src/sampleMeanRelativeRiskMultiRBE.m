@@ -2,7 +2,7 @@ function result = sampleMeanRelativeRiskMultiRBE(Nsamples, filepat1, filepat2,
     patients, organ, n1, n2, scale1, scale2, alpha_distrib, beta_distrib,
     RBEmin1_distrib, RBEmax1_distrib, RBEmin2_distrib, RBEmax2_distrib,
     opts, namemap)
-%function result = sampleMeanRelativeRiskMulti(Nsamples, filepat1, filepat2,
+%function result = sampleMeanRelativeRiskMultiRBE(Nsamples, filepat1, filepat2,
 %  patients, organ, n1, n2, scale1, scale2, alpha_distrib, beta_distrib,
 %  RBEmin1_distrib, RBEmax1_distrib, RBEmin2_distrib, RBEmax2_distrib,
 %  opts, namemap)
